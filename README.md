@@ -19,3 +19,15 @@ http://www.diva-portal.org/smash/get/diva2:23558/FULLTEXT01.pdf&sa=U&ei=uolnU9-4
 
 
 
+http://people.matinic.us/garrett/ 
+
+https://github.com/garrettdashnelson/commute-partitioning 
+
+https://twitter.com/en_dash 
+
+https://twitter.com/undertheraeda
+
+
+https://www.ons.gov.uk/census/2011census/2011censusdata/originanddestinationdata
+
+http://algorithms.tutorialhorizon.com/graph-representation-adjacency-matrix-and-adjacency-list/
