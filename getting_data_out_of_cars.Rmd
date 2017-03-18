@@ -1,0 +1,16 @@
+ 
+Tesla:
+
+- http://www.theverge.com/2016/8/11/12443310/tesla-autopilot-next-generation-radar-triple-camera
+- https://www.technologyreview.com/s/602703/tesla-announces-new-sensors-and-puts-the-brakes-on-autopilot/
+- https://www.quora.com/What-kind-of-sensors-does-the-Tesla-Model-S-use-for-its-autopilot-auto-steering-features
+- https://www.quora.com/How-does-Teslas-Autopilot-work-What-are-the-sensors-that-it-uses
+- http://www.fool.com/investing/2016/10/20/tesla-all-new-vehicles-are-shipped-with-sensors-fo.aspx
+
+
+OBD:
+
+- https://en.wikipedia.org/wiki/On-board_diagnostics#Security_issues 
+- https://en.wikipedia.org/wiki/On-board_diagnostics#Standards_documents
+
+
