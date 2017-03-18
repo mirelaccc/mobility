@@ -1,5 +1,11 @@
 
-# Mobility
+# Economic regions based on commutes
+
+- http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0166083
+- Code for data-processing and analysis: https://github.com/garrettdashnelson/commute-partitioning
+
+
+# Mobility in motion 
 
 - http://bigbytes.mobyus.com/commuteuk.aspx 
 - http://bigbytes.mobyus.com/commute.aspx 
