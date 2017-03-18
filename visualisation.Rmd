@@ -33,4 +33,11 @@ R + google maps:
 - https://pakillo.github.io/R-GIS-tutorial/ https://cran.r-project.org/web/packages/RgoogleMaps/RgoogleMaps.pdf 
 - https://rpubs.com/nickbearman/r-google-map-making
 
+# Graphs on maps
+
+- http://stackoverflow.com/questions/35960170/igraph-add-to-geographic-map
+
+
+
+
 
