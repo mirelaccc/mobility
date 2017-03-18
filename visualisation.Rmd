@@ -3,8 +3,6 @@
 
 - http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0166083
 - Code for data-processing and analysis: https://github.com/garrettdashnelson/commute-partitioning
-
-
 - http://www.diva-portal.org/smash/get/diva2:23558/FULLTEXT01.pdf&sa=U&ei=uolnU9-4MYfP8wG83ICICA&ved=0CDEQFjAE&usg=AFQjCNGgV9n0MBGUxQjUaLuuL5dAPNt39Q
 - https://github.com/garrettdashnelson/commute-partitioning 
 - http://people.matinic.us/garrett/
@@ -25,7 +23,7 @@
 
 # Geography
 
-http://www.geonames.org/
+- http://www.geonames.org/
 
 R + google maps:
 
