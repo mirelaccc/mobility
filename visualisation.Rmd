@@ -1,19 +1,12 @@
 
 # Mobility
 
-
-http://bigbytes.mobyus.com/commuteuk.aspx 
-
-http://bigbytes.mobyus.com/commute.aspx 
-
-http://ilikebigbytes.com/index.php/2016/05/18/acs-commuter-data-visualizations/ 
-
-http://ilikebigbytes.com/index.php/2016/07/30/commuter-map-redux-england-wales/
-
-http://people.matinic.us/garrett/
-
-https://flowingdata.com/tag/commute/
- 
+- http://bigbytes.mobyus.com/commuteuk.aspx 
+- http://bigbytes.mobyus.com/commute.aspx 
+- http://ilikebigbytes.com/index.php/2016/05/18/acs-commuter-data-visualizations/ 
+- http://ilikebigbytes.com/index.php/2016/07/30/commuter-map-redux-england-wales/
+- http://people.matinic.us/garrett/
+- https://flowingdata.com/tag/commute/
 
 
 # Geography
