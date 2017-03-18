@@ -1,4 +1,34 @@
 
+# Tips for generating origin destination data:
+
+- Voor de (eenvoudige) modellering van verkeer van en naar steden en dorpen:
+- + Gegevens over het aantal inwoners en het percentage werkenden, adv. regionale kerncijfers op StatLine.
+- + Inzichten uit de graviteitstheorie: bijvoorbeeld aannemen dat 
+- + 1) het verkeer tussen twee steden evenredig toeneemt met de grootte van de (beroeps)bevolking van de steden, 
+- + 2) en omgekeerd evenredig is met het kwadraat van de afstand (of reistijd) tussen de steden.
+- + Inzichten uit de literatuur over verkeer en vervoer. In ‘Verkeer en vervoer in hoofdlijnen’ staat bijvoorbeeld dat Schafer (1998) concludeert dat het reistijdbudget wereldwijd gemiddeld op 1,1 uur per persoon per dag ligt, ongeacht de economische, sociale en geografische situatie.
+
+- Resultaten van het Onderzoek Verkeer in Nederland (OViN). 
+- + Bijvoorbeeld: http://statline.cbs.nl/Statweb/publication/?VW=T&DM=SLNL&PA=83494NED&D1=0-2&D2=0&D3=1-8&D4=1-14&D5=0&D6=l&HD=170301-1558&HDR=T,G5,G2&STB=G1,G3,G4
+- + Het model zou kunnen worden geijkt met behulp van verkeersmetingen, bijvoorbeeld met het aantal voertuigpassages op de snelwegen. 
+- Zie: http://statline.cbs.nl/Statweb/publication/?DM=SLNL&PA=82855NED&D1=0&D2=0,195-239&D3=39-51&VW=T
+
+- De statistiek Nabijheid Voorzieningen: http://statline.cbs.nl/Statweb/publication/?DM=SLNL&PA=80305NED&D1=0,19,23,35,47-50,85,109&D2=0,76,357-358,435&D3=7-9&VW=T
+
+- De combinatie van traffic demand data en metingen op de wegen is al eens theoretisch uitgewerkt door Yinyi Ma. Zie haar proefschrift: https://repub.eur.nl/pub/80174
+
+- Info over graviteitsmodellering:
+- + Eenvoudige omschrijving: https://nl.wikipedia.org/wiki/Graviteitsmodel_in_de_geografie
+- + Gedetailleerde uitwerking: http://www.kuleuven.be/traffic/dwn/H111part1.pdf
+
+- Search on: ‘traffic demand modelling’
+
+- Info on mobility:
+- https://www.kimnet.nl/
+- https://www.cbs.nl/nl-nl/publicatie/2016/25/transport-en-mobiliteit-2016
+
+
+ 
 # Generating commutes dataset based on the gravity based model 
 
 - calculate the distances between all points (cities) in a dataset (so in 5 rows, (n-1)+(n-2)+...+(n-n)) 10 total distances)
@@ -33,56 +63,8 @@
      # [1]  2000000  3000000  4000000  5000000  6000000  8000000 10000000 12000000 15000000 20000000
  
  
- 
- Voor de (eenvoudige) modellering van verkeer van en naar steden en dorpen zijn je gebruik kunnen maken van:
-
-·         Gegevens over het aantal inwoners en het percentage werkenden. Zie de regionale kerncijfers op StatLine.
-
-·         Inzichten uit de graviteitstheorie: je kunt bijvoorbeeld aannemen dat het verkeer tussen twee steden evenredig toeneemt met de grootte van de (beroeps)bevolking van de steden en omgekeerd evenredig is met het kwadraat van de afstand (of reistijd) tussen de steden.
-
-·         Inzichten uit de literatuur over verkeer en vervoer. In het boek ‘Verkeer en vervoer in hoofdlijnen’ staat bijvoorbeeld dat Schafer (1998) concludeert dat het reistijdbudget wereldwijd gemiddeld op 1,1 uur per persoon per dag ligt, ongeacht de economische, sociale en geografische situatie.
-
-·         Resultaten van het Onderzoek Verkeer in Nederland (OViN). Zie bijvoorbeeld: http://statline.cbs.nl/Statweb/publication/?VW=T&DM=SLNL&PA=83494NED&D1=0-2&D2=0&D3=1-8&D4=1-14&D5=0&D6=l&HD=170301-1558&HDR=T,G5,G2&STB=G1,G3,G4
-
-·         Het model zou kunnen worden geijkt met behulp van verkeersmetingen, bijvoorbeeld met het aantal voertuigpassages op de snelwegen. Zie: http://statline.cbs.nl/Statweb/publication/?DM=SLNL&PA=82855NED&D1=0&D2=0,195-239&D3=39-51&VW=T
-
-·         De statistiek Nabijheid Voorzieningen lijkt me ook interessant voor jou: http://statline.cbs.nl/Statweb/publication/?DM=SLNL&PA=80305NED&D1=0,19,23,35,47-50,85,109&D2=0,76,357-358,435&D3=7-9&VW=T
-
-·         De combinatie van traffic demand data en metingen op de wegen is al eens theoretisch uitgewerkt door Yinyi Ma. Zie haar proefschrift: https://repub.eur.nl/pub/80174
 
  
-
-Meer informatie over de graviteitsmodellering:
-
-·         Eenvoudige omschrijving: https://nl.wikipedia.org/wiki/Graviteitsmodel_in_de_geografie
-
-·         Gedetailleerde uitwerking: http://www.kuleuven.be/traffic/dwn/H111part1.pdf
-
-·         Je zou ook eens kunnen zoeken op ‘traffic demand modelling’.
-
  
-
-Meer informatie over mobiliteit:
-
-·         https://www.kimnet.nl/
-
-·         https://www.cbs.nl/nl-nl/publicatie/2016/25/transport-en-mobiliteit-2016
-
-
-http://www.diva-portal.org/smash/get/diva2:23558/FULLTEXT01.pdf&sa=U&ei=uolnU9-4MYfP8wG83ICICA&ved=0CDEQFjAE&usg=AFQjCNGgV9n0MBGUxQjUaLuuL5dAPNt39Q
-
-http://people.matinic.us/garrett/ 
-
-https://github.com/garrettdashnelson/commute-partitioning 
-
-https://twitter.com/en_dash 
-
-https://twitter.com/undertheraeda
-
-
-https://www.ons.gov.uk/census/2011census/2011censusdata/originanddestinationdata
-
-http://algorithms.tutorialhorizon.com/graph-representation-adjacency-matrix-and-adjacency-list/
-
 
 
