@@ -13,7 +13,8 @@
 
 http://www.geonames.org/
 
-- R + google maps
+R + google maps:
+
 - https://www.youtube.com/watch?v=xm2u6IlHOeI 
 - http://bcb.dfci.harvard.edu/~aedin/courses/R/CDC/maps.html 
 - https://gist.github.com/josecarlosgonz/6417633 -
