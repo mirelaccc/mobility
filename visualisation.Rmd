@@ -5,14 +5,22 @@
 - Code for data-processing and analysis: https://github.com/garrettdashnelson/commute-partitioning
 
 
+- http://www.diva-portal.org/smash/get/diva2:23558/FULLTEXT01.pdf&sa=U&ei=uolnU9-4MYfP8wG83ICICA&ved=0CDEQFjAE&usg=AFQjCNGgV9n0MBGUxQjUaLuuL5dAPNt39Q
+- https://github.com/garrettdashnelson/commute-partitioning 
+- http://people.matinic.us/garrett/
+- https://twitter.com/en_dash 
+- https://twitter.com/undertheraeda
+- https://www.ons.gov.uk/census/2011census/2011censusdata/originanddestinationdata
+- http://algorithms.tutorialhorizon.com/graph-representation-adjacency-matrix-and-adjacency-list/
+- http://ilikebigbytes.com/index.php/2016/07/30/commuter-map-redux-england-wales/
+- https://flowingdata.com/tag/commute/
+
+
 # Mobility in motion 
 
 - http://bigbytes.mobyus.com/commuteuk.aspx 
 - http://bigbytes.mobyus.com/commute.aspx 
 - http://ilikebigbytes.com/index.php/2016/05/18/acs-commuter-data-visualizations/ 
-- http://ilikebigbytes.com/index.php/2016/07/30/commuter-map-redux-england-wales/
-- http://people.matinic.us/garrett/
-- https://flowingdata.com/tag/commute/
 
 
 # Geography
@@ -26,3 +34,5 @@ R + google maps:
 - https://gist.github.com/josecarlosgonz/6417633 -
 - https://pakillo.github.io/R-GIS-tutorial/ https://cran.r-project.org/web/packages/RgoogleMaps/RgoogleMaps.pdf 
 - https://rpubs.com/nickbearman/r-google-map-making
+
+
