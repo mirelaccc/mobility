@@ -29,4 +29,23 @@
 - https://www.youtube.com/watch?v=xm2u6IlHOeI
 - https://rpubs.com/nickbearman/r-google-map-making
 
+More:
 
+- http://stackoverflow.com/questions/30647537/using-geo-coordinates-as-vertex-coordinates-in-the-igraph-r-package/30671830#30671830
+- http://stackoverflow.com/questions/35960170/igraph-add-to-geographic-map
+- http://stackoverflow.com/questions/29006205/how-to-plot-a-graph-with-weighted-edges-in-r
+- http://stackoverflow.com/questions/16390221/how-to-make-grouped-layout-in-igraph 
+- http://cneurocvs.rmki.kfki.hu/igraph/doc/R/graph.adjacency.html 
+- http://estebanmoro.org/2012/11/temporal-networks-with-igraph-and-r-with-20-lines-of-code/ 
+- https://www.r-bloggers.com/temporal-network-model-barabasi-albert-model-with-the-library-igraph/ 
+- https://www.r-bloggers.com/going-viral-with-rs-igraph-package/ 
+- https://www.r-bloggers.com/a-look-at-the-igraph-package/ 
+- https://www.r-bloggers.com/sunbelt-and-eusn-workshops-on-using-r-and-igraph-for-sna/ 
+- https://www.r-bloggers.com/search/igraph/ 
+- http://igraph.org/r/doc/aaa-igraph-package.html
+- http://stackoverflow.com/questions/25381786/weighted-edges-in-r-igraph 
+- http://stackoverflow.com/questions/21300821/igraph-creating-a-weighted-adjacency-matrix
+- http://igraph.org/python/doc/tutorial/tutorial.html 
+- http://igraph.org/r/doc/graph_from_adjacency_matrix.html
+- http://igraph.org/r/doc/ 
+- http://stackoverflow.com/questions/35960170/igraph-add-to-geographic-map 
