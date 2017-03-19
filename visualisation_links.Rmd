@@ -21,11 +21,12 @@
 - http://ilikebigbytes.com/index.php/2016/05/18/acs-commuter-data-visualizations/ 
 
 
-# Geography
+# Geography & googlemaps
 
 - http://www.geonames.org/
-
-
-
+- https://cran.r-project.org/web/packages/RgoogleMaps/RgoogleMaps.pdf
+- https://gist.github.com/josecarlosgonz/6417633
+- https://www.youtube.com/watch?v=xm2u6IlHOeI
+- https://rpubs.com/nickbearman/r-google-map-making
 
 
