@@ -25,18 +25,6 @@
 
 - http://www.geonames.org/
 
-R + google maps:
-
-- https://www.youtube.com/watch?v=xm2u6IlHOeI 
-- http://bcb.dfci.harvard.edu/~aedin/courses/R/CDC/maps.html 
-- https://gist.github.com/josecarlosgonz/6417633 -
-- https://pakillo.github.io/R-GIS-tutorial/ https://cran.r-project.org/web/packages/RgoogleMaps/RgoogleMaps.pdf 
-- https://rpubs.com/nickbearman/r-google-map-making
-
-# Graphs on maps
-
-- http://stackoverflow.com/questions/35960170/igraph-add-to-geographic-map
-
 
 
 
