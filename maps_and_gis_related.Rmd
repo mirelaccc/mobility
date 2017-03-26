@@ -1,4 +1,14 @@
 
+Geo:
+
+- http://www.cs.rochester.edu/~sadilek/research/map-NYC/ 
+- https://www.r-bloggers.com/visualising-thefts-using-heatmaps-in-ggplot2/
+- https://dev.socrata.com/blog/2014/10/01/animated-heatmap.html
+- http://dataconomy.com/using-geo-referenced-heatmaps-to-display-real-time-temperature-dynamic-behaviors/
+- http://geospark.datasyslab.org/
+- https://www.google.nl/search?q=heatmaps+geo+locations+time+r&client=ubuntu&channel=fs&biw=1144&bih=615&source=lnms&tbm=isch&sa=X&ved=0ahUKEwjNzeTYpOTQAhWD0hoKHcO3C8AQ_AUICCgB#imgrc=VivQOXHvMW7HkM%3A
+- http://www.digital-geography.com/csv-heatmap-leaflet/#.WEkoeWco-ho
+- http://www.geonames.org/export/web-services.html
 
 ESRI maps:
 
