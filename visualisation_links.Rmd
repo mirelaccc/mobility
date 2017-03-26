@@ -1,5 +1,5 @@
 
-# Economic regions based on commutes
+Economic regions based on commutes
 
 - http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0166083
 - Code for data-processing and analysis: https://github.com/garrettdashnelson/commute-partitioning
@@ -12,7 +12,7 @@
 - http://algorithms.tutorialhorizon.com/graph-representation-adjacency-matrix-and-adjacency-list/
 
 
-# Mobility in motion 
+Mobility in motion 
 
 - http://bigbytes.mobyus.com/commuteuk.aspx 
 - http://bigbytes.mobyus.com/commute.aspx 
@@ -21,8 +21,9 @@
 - http://velocityjs.org/
 - https://flowingdata.com/tag/commute/
 - http://www.datadictionary.nhs.uk/data_dictionary/nhs_business_definitions/m/middle_layer_super_output_area_de.asp?shownav=1
+- http://www.statsmapsnpix.com/
 
-# Geography & googlemaps
+Geography & googlemaps
 
 - http://www.geonames.org/
 - https://cran.r-project.org/web/packages/RgoogleMaps/RgoogleMaps.pdf
