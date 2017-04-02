@@ -1,0 +1,5 @@
+
+- Understanding Road Usage Patterns in Urban Areas https://arxiv.org/pdf/1212.5327.pdf
+- Managing travel demand: Location recommendation for system efficiency based on mobile phone data https://arxiv.org/pdf/1610.06825.pdf
+- Inferring Person-to-person Proximity Using WiFi Signals https://arxiv.org/pdf/1610.04730.pdf
+- 
