@@ -4,3 +4,6 @@
 - Inferring Person-to-person Proximity Using WiFi Signals https://arxiv.org/pdf/1610.04730.pdf
 - CDRC Maps Mapping selected datasets from CDRC Data, part of the Consumer Data Research Centre https://maps.cdrc.ac.uk/#/metrics/epc_current/default/BTTTFTT/13/0.0317/51.4955/
 
+Prediction:
+
+- https://research.googleblog.com/2017/02/using-machine-learning-to-predict.html
