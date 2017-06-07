@@ -15,7 +15,7 @@ Style the map.
 Save as an SVG.
 
 # kml files to read in, in the order they should be read in
-  kmlFiles <- paste0(c('DrivingRoute1','DrivingRoute2', 'Ferry', 
+  kmlFiles <- paste0(c('ALM','DrivingRoute2', 'Ferry', 
                        paste0('DrivingRoute',3:6)),'.kml')
   
   r1 <- do.call(rbind, lapply(kmlFiles, function(x) 
