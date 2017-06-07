@@ -1,6 +1,6 @@
 
 # set wd, load libs, read initial csv into dataframe
-setwd("/x/y/z/")
+setwd("/home/bigdata09/projs/mob/")
 #install.packages(“ggplot2″)
 #install.packages(“jsonlite”)
 #install.packages(“plyr”)
@@ -10,6 +10,8 @@ library(geosphere)
 library(data.table)
 library(gdata)
 library(varhandle)
+library(mapmate)
+library(dplyr)
 
 df00 <- read.csv("Bevolkingsontwikkeli_040617192441.csv",header = TRUE)
 #dim(df00)
@@ -168,7 +170,11 @@ df03$lon_i <- unfactor(df03$lon_i)
 df03$lat_i <- unfactor(df03$lat_i)
 df03$lon_j <- unfactor(df03$lon_j)
 df03$lat_j <- unfactor(df03$lat_j)
- 
+
+# make population weights; normalized population sizes
+dfo3$pop_i_norm <- (max(df03$pop_i)-min(df03$pop_i))
+df03$pop_j_norm <- (max(df03$pop_j)-min(df03$pop_j))
+
 
 # for drawing directed edges later on
 # decide direction based on the larger population out of any 2-combination
@@ -211,12 +217,38 @@ for (i in 1:nrow(df03)){
   )
 }
 
+
+# will be handy for further processing
+# nd introcuses a (tolerable) error of max 50 cm. (w/in one distance-measurement!)
+round_distances <- as.integer(round(df03$distances))
+df03$round_distances <- round_distances
+
 # the gravity is based on the 'grivity model' ((pop_i * pop_j) / distances)
 df03$gravity <- 0
-round_distances <- as.integer(round(df03$distances))
 
 for (i in 1:nrow(df03)){
     df03$gravity[i] <- as.numeric(((df03$pop_i[i] * df03$pop_j[i]) / round_distances[i]))
 }
 
- 
+# chance of actual movement
+# note: 2 more gradients should be added for more realistic choices
+# also, actual trip-duraion should be taken into acount, regardles of (spherical) lon-lat distances
+df03$far_apart <- 0
+for (i in 1:nrow(df03)){
+  ifelse(
+    (df03$round_distances[i] < 100000),
+    df03$far_apart <- 0,
+    df03$far_apart <- 1
+  )
+}
+
+# draw edge if chance present
+df03$edge <- 0
+for (i in 1:nrow(df03)){
+ifelse(
+  (df$far_apart[i] == 0),
+  df03$edge <- 1,
+  df03$edge <- 0
+  )
+}
+
