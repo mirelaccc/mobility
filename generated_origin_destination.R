@@ -171,13 +171,38 @@ df03$lat_i <- unfactor(df03$lat_i)
 df03$lon_j <- unfactor(df03$lon_j)
 df03$lat_j <- unfactor(df03$lat_j)
 
+write.csv(df03, 'df03.csv')
+
+##
+df03_possible_duplicates <- duplicated(df03$distances)
+df03_uniqdists <- unique(df03$distances)
+
+df03$possible_duplicate <- 0
+
+# remove duplicate connections
+for (i in 1:10){
+  for (j in 1:30){
+    ifelse(
+      (df03$distances[i] == df03$distances[j]),
+        df03$possible_duplicate[i] <- 1,
+        df03$possible_duplicate[i] <- 0
+    )
+  }
+}
+
+##
+
+df03_possible_duplicates <- duplicated(df03[,5:6])
+nrow(df03$possible_duplicate)
+
 # make population weights; normalized population sizes
 dfo3$pop_i_norm <- (max(df03$pop_i)-min(df03$pop_i))
 df03$pop_j_norm <- (max(df03$pop_j)-min(df03$pop_j))
 
 
+
 # for drawing directed edges later on
-# decide direction based on the larger population out of any 2-combination
+# decide DIRECTION based on the larger population out of any 2-combination
 df03$weight_muni <- 0
 
 for (i in 1:nrow(df03)){
@@ -190,12 +215,12 @@ for (i in 1:nrow(df03)){
         , df03$weight_muni[i] <- 0)
   )
 }
- 
-df03$weight_lon <- 0
 
+# which population 
+df03$weight_lon <- 0
 for (i in 1:nrow(df03)){
   ifelse(
-    (df03$pop_i[i] > df03$pop_j[i])
+    (df03$pop_i[i] > df03$pop_i[i])
     , df03$weight_lon[i] <- df03$lon_i[i]
       , ifelse(
         (df03$pop_i[i] < df03$pop_j[i])
@@ -205,10 +230,9 @@ for (i in 1:nrow(df03)){
 }
  
 df03$weight_lat <- 0
-  
 for (i in 1:nrow(df03)){
   ifelse(
-    (df03$pop_i[i] > df03$pop_j[i])
+    (df03$pop_i[i] > df03$pop_i[i])
     , df03$weight_lat[i] <- df03$lat_i[i]
       , ifelse(
         (df03$pop_i[i] < df03$pop_j[i])
@@ -217,38 +241,99 @@ for (i in 1:nrow(df03)){
   )
 }
 
-
-# will be handy for further processing
-# nd introcuses a (tolerable) error of max 50 cm. (w/in one distance-measurement!)
+# ROUND_DISTANCES will be handy for further processing
+# it introcuses a (tolerable?) error of <50 cm. (w/in one distance-measurement!)
 round_distances <- as.integer(round(df03$distances))
 df03$round_distances <- round_distances
 
 # the gravity is based on the 'grivity model' ((pop_i * pop_j) / distances)
-df03$gravity <- 0
+df03$gravity2 <- 0
 
 for (i in 1:nrow(df03)){
-    df03$gravity[i] <- as.numeric(((df03$pop_i[i] * df03$pop_j[i]) / round_distances[i]))
+    df03$gravity2[i] <- round(((df03$pop_i[i] * df03$pop_j[i]) / df03$round_distances[i]))
 }
 
-# chance of actual movement
+# chance of actual movement, as being not FAR_APART
 # note: 2 more gradients should be added for more realistic choices
 # also, actual trip-duraion should be taken into acount, regardles of (spherical) lon-lat distances
 df03$far_apart <- 0
-for (i in 1:nrow(df03)){
-  ifelse(
-    (df03$round_distances[i] < 100000),
-    df03$far_apart <- 0,
-    df03$far_apart <- 1
-  )
+  for (i in 1:nrow(df03)){
+    ifelse(
+      (df03$round_distances[i] < 100000),
+      df03$far_apart <- 0,
+      df03$far_apart <- 1
+    )
+  }
+
+# draw EDGE if chance present
+df03$edge <- 0
+  for (i in 1:nrow(df03)){
+    ifelse(
+      (df$far_apart[i] == 0),
+      df03$edge <- 1,
+      df03$edge <- 0
+      )
 }
 
-# draw edge if chance present
-df03$edge <- 0
-for (i in 1:nrow(df03)){
-ifelse(
-  (df$far_apart[i] == 0),
-  df03$edge <- 1,
-  df03$edge <- 0
-  )
-}
+# animate from-to flow
+# add paths as 
+
+
+>           lon0       lat0       lon1      lat1 Pop_wts0 Pop_wts1     Dist
+
+endpoints <- df03[,c("lon_i","lat_i","lon_j","lat_j")] 
+
+
+
+
+
+
+
+
+
+
+inverse_distance_weighting <- function(x) 1 - x/max(x) 
+endpoints <- gc_endpoints(df03, "lon_i", "lat_i") ##########
+
+#
+
+set.seed(192)
+data(network)
+
+distFun <- function(x) 1 - x/max(x)  # simple inverse distance weighting
+endpoints <- gc_endpoints(network, "lon", "lat")
+
+# take a weighted sample, e.g., favoring larger averaged populations and shorter distances
+endpoints <- mutate(endpoints, Dist_wts = distFun(Dist))
+endpoints <- sample_n(endpoints, 500, replace = TRUE, weight = (Pop_wts0 + Pop_wts1)/2 + Dist_wts)
+
+# expand data frame from endpoints to arcs, each composed of a sequence of points
+arcs_flat <- gc_arcs(endpoints, "lon0", "lat0", "lon1", "lat1", breakAtDateLine = TRUE)
+arcs_globe <- gc_arcs(endpoints, "lon0", "lat0", "lon1", "lat1")
+
+n <- max(paths_flat$id)
+png.args <- list(width = 600, height = 300, bg = "black")
+clrs <- c("#1E90FF50", "#FFFFFF50", "#FFFFFF", "#1E90FF75")
+ylm <- range(paths_flat$lat)  # trimming empty southern map region
+
+save_seq(paths_flat, id = "id", n.frames = n, ortho = FALSE, type = "network",
+         file = "network2D", png.args = png.args)
+
+
+gglist <- save_seq(paths_globe, id = "id", n.frames = n, col = clrs, type = "network",
+                   
+                   
+                   
+                   
+                   
+                   
+# rank by distane,
+> df03$round_distance[order(population$age),c(1,2)]
+
+df031 <- order(df03$round_distances))
+df032 <- df031[,c(X,Y,Z)]
+
+
+#
+
 
