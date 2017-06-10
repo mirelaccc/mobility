@@ -1,6 +1,6 @@
 
 # set wd, load libs, read initial csv into dataframe
-setwd("/x/y/z/m/")
+setwd("/home/bigdata09/projs/mob/")
 #install.packages(“ggplot2″)
 #install.packages(“jsonlite”)
 #install.packages(“plyr”)
@@ -173,95 +173,128 @@ df03$lat_j <- unfactor(df03$lat_j)
 
 write.csv(df03, 'df03.csv')
 
-##
-df03_possible_duplicates <- duplicated(df03$distances)
-df03_uniqdists <- unique(df03$distances)
-
-df03$possible_duplicate <- 0
-
-# remove duplicate connections
-for (i in 1:10){
-  for (j in 1:30){
-    ifelse(
-      (df03$distances[i] == df03$distances[j]),
-        df03$possible_duplicate[i] <- 1,
-        df03$possible_duplicate[i] <- 0
-    )
-  }
-}
-
-##
-
-df03_possible_duplicates <- duplicated(df03[,5:6])
-nrow(df03$possible_duplicate)
-
-# make population weights; normalized population sizes
-dfo3$pop_i_norm <- (max(df03$pop_i)-min(df03$pop_i))
-df03$pop_j_norm <- (max(df03$pop_j)-min(df03$pop_j))
-
-
+# ##
+# df03_possible_duplicates <- duplicated(df03$distances)
+# df03_uniqdists <- unique(df03$distances)
+# 
+# df03$possible_duplicate <- 2
+# 
+# # remove duplicate connections
+# for (i in 1:nrow(df03)){
+#   for (j in 1:800){
+#     ifelse(
+#       (df03$distances[i] == df03$distances[j]),
+#         df03$possible_duplicate[i] <- 1,
+#         df03$possible_duplicate[i] <- 0
+#     )
+#   }
+# }
+# 
+# ##
+# 
+# df03_possible_duplicates <- duplicated(df03[,5:6])
+# nrow(df03$possible_duplicate)
+# 
+# ##
+# 
+# 
+# # make population weights; normalized population sizes
+# dfo3$pop_i_norm <- (max(df03$pop_i)-min(df03$pop_i))
+# df03$pop_j_norm <- (max(df03$pop_j)-min(df03$pop_j))
 
 # for drawing directed edges later on
 # decide DIRECTION based on the larger population out of any 2-combination
-df03$weight_muni <- 0
 
+# which population 
+df03$from_lon <- 10
 for (i in 1:nrow(df03)){
   ifelse(
     (df03$pop_i[i] > df03$pop_j[i])
-    , df03$weight_muni[i] <- df03$muni_i[i]
+    , df03$from_lon[i] <- df03$lon_i[i]
       , ifelse(
         (df03$pop_i[i] < df03$pop_j[i])
-        , df03$weight_muni[i] <- df03$muni_j[i]
-        , df03$weight_muni[i] <- 0)
+        , df03$from_lon[i] <- df03$lon_j[i]
+        , df03$from_lon[i] <- 0)
   )
 }
 
-# which population 
-df03$weight_lon <- 0
+df03$from_lat <- 10
 for (i in 1:nrow(df03)){
   ifelse(
-    (df03$pop_i[i] > df03$pop_i[i])
-    , df03$weight_lon[i] <- df03$lon_i[i]
+    (df03$pop_i[i] > df03$pop_j[i])
+    , df03$from_lat[i] <- df03 $lat_i[i]
       , ifelse(
         (df03$pop_i[i] < df03$pop_j[i])
-        , df03$weight_lon[i] <- df03$lon_j[i]
-        , df03$weight_lon[i] <- 0)
+        , df03$from_lat[i] <- df03$lat_j[i]
+        , df03$from_lat[i] <- 0)
   )
 }
- 
-df03$weight_lat <- 0
+
+df03$to_lon <- 10
 for (i in 1:nrow(df03)){
   ifelse(
-    (df03$pop_i[i] > df03$pop_i[i])
-    , df03$weight_lat[i] <- df03$lat_i[i]
-      , ifelse(
-        (df03$pop_i[i] < df03$pop_j[i])
-        , df03$weight_lat[i] <- df03$lat_j[i]
-        , df03$weight_lat[i] <- 0)
+    (df03$pop_i[i] < df03$pop_j[i])
+    , df03$to_lon[i] <- df03$lon_i[i]
+    , ifelse(
+      (df03$pop_i[i] > df03$pop_j[i])
+      , df03$to_lon[i] <- df03$lon_j[i]
+      , df03$to_lon[i] <- 0)
   )
 }
+
+df03$to_lat <- 10
+for (i in 1:nrow(df03)){
+  ifelse(
+    (df03$pop_i[i] < df03$pop_j[i])
+    , df03$to_lat[i] <- df03 $lat_i[i]
+    , ifelse(
+      (df03$pop_i[i] > df03$pop_j[i])
+      , df03$to_lat[i] <- df03$lat_j[i]
+      , df03$to_lat[i] <- 0)
+  )
+}
+
+
 
 # ROUND_DISTANCES will be handy for further processing
 # it introcuses a (tolerable?) error of <50 cm. (w/in one distance-measurement!)
 round_distances <- as.integer(round(df03$distances))
-df03$round_distances <- round_distances
+df03$rounded_distances <- round_distances
 
 # the gravity is based on the 'grivity model' ((pop_i * pop_j) / distances)
-df03$gravity2 <- 0
-
+df03$gravity <- 0
 for (i in 1:nrow(df03)){
-    df03$gravity2[i] <- round(((df03$pop_i[i] * df03$pop_j[i]) / df03$round_distances[i]))
+    df03$gravity[i] <- round(((as.numeric(df03$pop_i[i]) * as.numeric(df03$pop_j[i])) / as.numeric(df03$rounded_distances[i])))
 }
 
 # chance of actual movement, as being not FAR_APART
 # note: 2 more gradients should be added for more realistic choices
 # also, actual trip-duraion should be taken into acount, regardles of (spherical) lon-lat distances
-df03$far_apart <- 0
+
+df03$rounded_distances2 <- as.integer(df03$rounded_distances / 10)
+
+
+
+
+df03$too_far_apart <- 0
+for (i in 1:nrow(df03)){
+  ifelse(
+    (as.integer(df03$rounded_distances[i]) > as.integer(1000000.0)
+    , df03$to_lat[i] <- df03 $lat_i[i]
+    , ifelse(
+      (df03$pop_i[i] > df03$pop_j[i])
+      , df03$to_lat[i] <- df03$lat_j[i]
+      , df03$to_lat[i] <- 0)
+  )
+}
+
+df03$far_apart2 <- 20
+
   for (i in 1:nrow(df03)){
     ifelse(
-      (df03$round_distances[i] < 100000),
-      df03$far_apart <- 0,
-      df03$far_apart <- 1
+      (as.integer(df03$rounded_distances[i]) > as.integer(1000000.0)),
+      df03$far_apart2 <- TRUE,
+      df03$far_apart2 <- FALSE
     )
   }
 
@@ -269,11 +302,22 @@ df03$far_apart <- 0
 df03$edge <- 0
   for (i in 1:nrow(df03)){
     ifelse(
-      (df$far_apart[i] == 0),
+      (df03$far_apart[i] == 0),
       df03$edge <- 1,
       df03$edge <- 0
-      )
-}
+    )
+  }
+
+head(df03)
+dim(df03)
+
+# new dataframe for network processing
+df04 <- data.frame(df03[,c(15,16,17,18,20,22)])
+
+df05 <- subset(df04, edge == 1)
+
+colnames(df04)[1] <- 
+
 
 # animate from-to flow
 # add paths as 
@@ -335,5 +379,99 @@ df032 <- df031[,c(X,Y,Z)]
 
 
 #
+
+
+
+
+
+# script adapted from https://github.com/asheshwor/mapping-location-history/blob/master/mapping_google_history.r
+
+#Load packages
+library(maps)
+library(ggmap)
+library(mapdata)
+library(mapproj)
+library(maptools)
+library(RColorBrewer)
+library(classInt)
+library(rgdal)
+library(scales)
+#Setting up directory and file list
+dirName <- "//ASH-desktop/Users/asheshwor/Documents/R_git/history_KML/"
+fileList <- c(dir(dirName))
+numFiles <- length(fileList)
+#Reading coordinates from KML file downloaded
+#  from google location history
+lat <- numeric(0)
+lon <- numeric(0)
+tStart <- Sys.time() #track time
+# WARNING!! takes a while to loop through
+#took ~10 min for 191,355 sets in 12 months of history (4 gb ram win 7 64 bit)
+#took 1.4 hrs for the same on my old toshiba (3 gb ram win 7 64 bit)
+for (i in 1:numFiles) {
+dirTemp <- paste(dirName, fileList[i], sep="")
+hist <- getKMLcoordinates(dirTemp) #read KML file
+maxl <- length(hist)
+for (j in 1:maxl) {
+  hist.0 <- hist[[j]]
+  lat <- c(lat, hist.0[2])
+  lon <- c(lon, hist.0[1])
+}
+}
+tFinish <- Sys.time()
+difftime(tFinish, tStart) #calculating time it took to read
+#convert to a dataframe
+hist.df <- data.frame(lon, lat)
+#Write extracted coordinates to a csv file
+write.csv(hist.df, file="//ASH-desktop/Users/asheshwor/Documents/R_git/LocationHistory.csv")
+#Reading coordinates
+hist.df2 <- read.csv(file="//ASH-desktop/Users/asheshwor/Documents/R_git/LocationHistory.csv", header=TRUE)
+hist.df2 <- hist.df2[,-1] #dropping first column
+
+#rounding off data for density plots
+hist.df3 <- hist.df2
+hist.df3$lon <- round(hist.df3$lon, 4)
+hist.df3$lat <- round(hist.df3$lat, 4)
+
+#plotting the points
+nl01 <- "nl_01" #create empty map
+nl01_map <- qmap(nl01, zoom=14, maptype="roadmap", legend="topleft") #google roadmap
+png("nl01_map.png",720,720)
+nl01_map + geom_point(aes(x = lon, y = lat), 
+                    data = hist.df2, 
+                    color = couleur[8], alpha = 0.5)
+dev.off()
+
+
+# dfxx[grep("word", dfxx$yy, ignore.case=T),]
+x.sub1 <- subset(x.df, y > 2 & V1 > 0.6)
+
+
+
+# > head(df03)
+#                   dist_names distances compared_populations pop_i pop_j
+# 1       Aa en Hunze_Aalburg    181411          25294,13061 25294 13061
+# 2      Aa en Hunze_Aalsmeer  158998.7          25294,31393 25294 31393
+# 3        Aa en Hunze_Aalten  121147.8          25294,27134 25294 27134
+
+x <- diff(df03$pop_i, df03$pop_j)
+df04 <- data.frame(df03,data.frame)
+df03 <- data.frame(pop1=unlist(s), AB=rep(v$AB, sapply(s, FUN=length)))
+df02 <- cbind(dist_names,distances,compared_populations)
+compared_populations <- combn(as.character(df01$population_01042017), 2, FUN = paste, collapse=",")
+max_pop <- as.numeric(max(df01$population_01042017))
+df02 <- cbind(dist_names,distances,compared_populations)
+
+
+
+# na_municipalities <- df01[is.na(df01$longitude),]
+#           municipality population_01042017 longitude latitude
+# 113 Goeree-Overflakkee               48788        NA       NA
+# 156     Hof van Twente               34972        NA       NA
+# 199              Lopik               14290        NA       NA
+# 369          De Wolden               23789        NA       NA
+
+# dfx <- df01[is.na(df01$longitude),]
+
 
 
