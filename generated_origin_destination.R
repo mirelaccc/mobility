@@ -25,6 +25,8 @@ library(RColorBrewer)
 library(classInt)
 library(rgdal)
 library(scales)
+library(raster)
+ 
 
 df00 <- read.csv("Bevolkingsontwikkeli_040617192441.csv",header = TRUE)
 #dim(df00)
@@ -322,27 +324,64 @@ dim(df03)
 # subsetting only necessary values new dataframes for network & map plots 
 # filter only actual movements
 
-write.csv(df03, "df03_1.csv")
+write.csv(df03, "df03_2.csv")
 
 
 ############################################################################
 
 setwd("/home/bigdata09/projs/mob/")
-df03 <- read.csv("df03_1.csv",header = TRUE)
+df04 <- read.csv("df03_2.csv",header = TRUE)
 
-df_map_plot <- data.frame(df03[,c(15,16,17,18,20,21)])
+df_map_plot <- data.frame(df04[,c(6,7,16,17,18,19,21,22)])
 df_map_plot <- subset(df_map_plot, edge1 == 1)
-df_map_plot <- subset(df_map_plot[, c(1,2,3,4)])
+#df_map_plot <- subset(df_map_plot[, c(1,2,3,4)])
 
-df_network_plot <- data.frame(df03[,c(5,6,20,22)])
+df_map$gravity <- as.integer(df_map$gravity)
+df_map$normalized_gravity <- (df_map$gravity-min(df_map$gravity))/(max(df_map$gravity)-min(df_map$gravity))
+df_map_s2 <- subset(df_map, normalized_gravity > 0.01)
+df_map <- df_map_plot
+df_map$gravity <- as.integer(df_map$gravity)
+df_map$normalized_gravity <- (df_map$gravity-min(df_map$gravity))/(max(df_map$gravity)-min(df_map$gravity))
+df_map_s2 <- subset(df_map, normalized_gravity > 0.02)
+
+# df_map_s2 <- subset(df_map, normalized_gravity > 0.01)
+# > dim(df_map_s2)
+# [1] 1959    9
+
+df_network_plot <- data.frame(df04[,c(6,7,21,23)])
 df_network_plot <- subset(df_network_plot, edge2 == 1)
-df_network_plot <- subset(df_network_plot[,c(1,2,3)])
 df_network_plot$gravity <- as.integer(df_network_plot$gravity)
 
 
+# h<-hist(df_map$normalized_gravity, breaks=200, col="red", xlab="norm_grav", 
+#         main="hist_test") 
+# d <- density(df_map$normalized_gravity)
+# plot(d, main="Kernel Density of normalized_gravity)")
+# polygon(d, col="red", border="blue")
+
+nl <- getData('GADM', country='NLD', level=1)
+df<-data.frame("from" = df_map_s2$muni_i, 
+               "to"= df_map_s2$muni_j)
+meta <- data.frame("name"=df_map_s2$muni_i, 
+                   "lon"=df_map_s2$from_lon,  
+                   "lat"=df_map_s2$from_lat)
+g_m <- graph.data.frame(df, directed=T)
+lo <- as.matrix(meta[,2:3])
+plot(nl)
+plot(g_m, layout=lo, add = TRUE, rescale = FALSE)
+
+jpeg('rplot.jpg')
+plot(g_m, layout=lo, add = TRUE, rescale = FALSE)
+dev.off()
+
+png(filename = "net2.png", height = 800, width = 800)
+plot(nl)
+plot(g_m, layout=lo, add = TRUE, rescale = FALSE)
+dev.off()
+
 # biofabric plot
 
-height <- vcount(df_network_plot)
+height <- vcount(df_map_s2)
 width <- ecount(df_network_plot)
 aspect <- height / width;
 plotWidth <- 100.0
@@ -381,9 +420,6 @@ apply(df_network_plot, 2, max)
 
 
 # plot from-to as directed, weighted NETWORK
-
-df_network_plot$scaled_gravity <- scale(df_network_plot$gravity, center = TRUE, scale = TRUE)
-df_network_plot$normalized_gravity <- (df_network_plot$gravity-min(df_network_plot$gravity))/(max(df_network_plot$gravity)-min(df_network_plot$gravity))
 
 
 colnames(df_network_plot)[1] <- 'from'
