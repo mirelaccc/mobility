@@ -7,27 +7,6 @@ setwd("/x/y/z/")
 #install_github("leonawicz/mapmate")
 #install_github("wjrl/RBioFabric")
 
-library(RJSONIO)
-library(ggmap)
-library(geosphere)
-library(data.table)
-library(gdata)
-library(varhandle)
-library(mapmate)
-library(dplyr)
-library(igraph)
-library(maps)
-library(ggmap)
-library(mapdata)
-library(mapproj)
-library(maptools)
-library(RColorBrewer)
-library(classInt)
-library(rgdal)
-library(scales)
-library(raster)
- 
-
 df00 <- read.csv("Bevolkingsontwikkeli_040617192441.csv",header = TRUE)
 #dim(df00)
 # [1] 388  17
@@ -329,6 +308,28 @@ write.csv(df03, "df03_2.csv")
 
 ############################################################################
 
+library(RJSONIO)
+library(ggmap)
+library(geosphere)
+library(data.table)
+library(gdata)
+library(varhandle)
+library(mapmate)
+library(dplyr)
+library(igraph)
+library(maps)
+library(ggmap)
+library(mapdata)
+library(mapproj)
+library(maptools)
+library(RColorBrewer)
+library(classInt)
+library(rgdal)
+library(scales)
+library(raster)
+library(RBioFabric)
+library(HiveR)
+
 setwd("/home/bigdata09/projs/mob/")
 df04 <- read.csv("df03_2.csv",header = TRUE)
 
@@ -351,7 +352,9 @@ df_map_s2 <- subset(df_map, normalized_gravity > 0.02)
 df_network_plot <- data.frame(df04[,c(6,7,21,23)])
 df_network_plot <- subset(df_network_plot, edge2 == 1)
 df_network_plot$gravity <- as.integer(df_network_plot$gravity)
-
+df_network_plot$normalized_gravity <- (df_network_plot$gravity-min(df_network_plot$gravity))/(max(df_network_plot$gravity)-min(df_network_plot$gravity))
+df_network_plot2<- subset(df_network_plot, normalized_gravity > 0.1)
+df_network_plot3 <- df_network_plot2[,c(1,2,5)]
 
 # h<-hist(df_map$normalized_gravity, breaks=200, col="red", xlab="norm_grav", 
 #         main="hist_test") 
@@ -370,25 +373,60 @@ lo <- as.matrix(meta[,2:3])
 plot(nl)
 plot(g_m, layout=lo, add = TRUE, rescale = FALSE)
 
-jpeg('rplot.jpg')
-plot(g_m, layout=lo, add = TRUE, rescale = FALSE)
-dev.off()
-
 png(filename = "net2.png", height = 800, width = 800)
 plot(nl)
 plot(g_m, layout=lo, add = TRUE, rescale = FALSE)
 dev.off()
 
+install.packages("maps")
+install.packages("geosphere")
+library(maps)
+library(geosphere)
+par(mfrow = c(2,2), mar=c(0,0,0,0))
+# Plot a map of the united states:
+map('WorldHires','Netherlands', col="grey20", fill=TRUE, bg="black", lwd=0.1)
+# Add a point on the map for each airport:
+points(x=airports$longitude, y=airports$latitude, pch=19,
+       cex=airports$Visits/80, col="orange")
+col.1 <- adjustcolor("orange red", alpha=0.4)
+col.2 <- adjustcolor("orange", alpha=0.4)
+edge.pal <- colorRampPalette(c(col.1, col.2), alpha = TRUE)
+edge.col <- edge.pal(100)
+for(i in 1:nrow(flights)) {
+  node1 <- airports[airports$ID == flights[i,]$Source,]
+  node2 <- airports[airports$ID == flights[i,]$Target,]
+  arc <- gcIntermediate( c(node1[1,]$longitude, node1[1,]$latitude),
+                         52
+                         c(node2[1,]$longitude, node2[1,]$latitude),
+                         n=1000, addStartEnd=TRUE )
+  edge.ind <- round(100*flights[i,]$Freq / max(flights$Freq))
+  lines(arc, col=edge.col[edge.ind], lwd=edge.ind/30)
+
 # biofabric plot
 
-height <- vcount(df_map_s2)
-width <- ecount(df_network_plot)
+g <- graph.data.frame(df_network_plot2, directed=T)
+height <- vcount(g)
+width <- ecount(g)
 aspect <- height / width;
-plotWidth <- 100.0
+plotWidth <- 600.0
 plotHeight <- plotWidth * (aspect * 1.2)
-pdf("myBioFabricOutput.pdf", width=plotWidth, height=plotHeight)
-bioFabric(bfGraph)
+pdf("biofabric1.pdf", width=plotWidth, height=plotHeight)
+bioFabric(g)
 dev.off()
+
+
+# Hive plot
+
+net1 <- list()
+net1$nodes <- df_network_plot3$muni_i
+net1$b <- df_network_plot3$muni_j
+net1$c <- df_network_plot3$normalized_gravity
+
+hive1 <- edge2HPD(edge_df = df_network_plot3)
+hive1 <- edge2HPD(edge_df = dataSet.ext)
+
+
+
 
 # fails! 
 apply(df_network_plot, 2, min)
