@@ -1,5 +1,5 @@
 
-# code largely from http://ralanbutler.com/blog/2016/01/25/nicaragua-making-map
+somw code from http://ralanbutler.com/blog/2016/01/25/nicaragua-making-map
 
 library(sp)
 library(maptools)
