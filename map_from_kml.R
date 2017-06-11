@@ -54,9 +54,38 @@ Save as an SVG.
   plot(driveLine, col = 'steelblue3', add = T, lwd = 2.75) 
   dev.off()
 
+                 
+####################
+
+                 
+    
+install.packages("plotKML", repos=c("http://R-Forge.R-project.org"))             
+                 
+http://gsif.isric.org/doku.php?id=wiki:tutorial_plotkml
+
+(https://www.youtube.com/watch?v=to0Kxmz_7dM)
+                 
+####################
+http://plotkml.r-forge.r-project.org/plotKML.html
+                 
+https://gist.github.com/sckott/6555738               
+https://developers.google.com/kml/documentation/kml_tut
+https://www.r-bloggers.com/author/kay-cichini/ 
+http://tuhrig.de/visualizing-kml-files-in-google-maps/ 
+https://github.com/garrettdashnelson/commute-partitioning
   
-  
-  
-  
-  
-  
+https://cran.r-project.org/web/packages/plotKML/plotKML.pdf
+http://data-analytics.net/wp-content/uploads/2014/09/geo4.html
+https://cran.r-project.org/web/packages/plotKML/vignettes/jss1079.pdf <---- 
+https://gis.stackexchange.com/questions/58131/how-to-efficiently-read-a-kml-file-into-r 
+http://opensourcesoftware.casact.org/draftblogs:4 
+https://www.nceas.ucsb.edu/scicomp/usecases/shapeFileToKML      
+https://www.r-bloggers.com/search/kml/
+http://www.mapsplugin.com/Google-Maps/Documentation-of-plugin-Googlemap/how-to-kml-tools.html 
+https://stackoverflow.com/questions/13762793/plotting-choropleth-maps-from-kml-data-using-ggplot2
+http://tuhrig.de/visualizing-kml-files-in-google-maps/ 
+https://developers.google.com/maps/documentation/javascript/kml
+https://help.openstreetmap.org/questions/7174/how-to-import-kml-files-into-openstreetmap 
+https://help.openstreetmap.org/questions/32396/is-it-possible-to-import-a-kml-file-into-osm
+https://developers.google.com/kml/documentation/regions#prepare-the-kml-files
+https://www.r-bloggers.com/make-a-kml-file-from-an-openstreetmap-trail/
