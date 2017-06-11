@@ -73,7 +73,9 @@ https://developers.google.com/kml/documentation/kml_tut
 https://www.r-bloggers.com/author/kay-cichini/ 
 http://tuhrig.de/visualizing-kml-files-in-google-maps/ 
 https://github.com/garrettdashnelson/commute-partitioning
-  
+https://edzer.github.io/UseR2016/
+https://cran.r-project.org/web/views/SpatioTemporal.html
+http://oscarperpinan.github.io/spacetime-vis/spacetime.html
 https://cran.r-project.org/web/packages/plotKML/plotKML.pdf
 http://data-analytics.net/wp-content/uploads/2014/09/geo4.html
 https://cran.r-project.org/web/packages/plotKML/vignettes/jss1079.pdf <---- 
