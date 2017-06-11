@@ -4,6 +4,9 @@ setwd("/x/y/z/")
 #install.packages(“ggplot2″)
 #install.packages(“jsonlite”)
 #install.packages(“plyr”)
+#install_github("leonawicz/mapmate")
+#install_github("wjrl/RBioFabric")
+
 library(RJSONIO)
 library(ggmap)
 library(geosphere)
@@ -13,6 +16,15 @@ library(varhandle)
 library(mapmate)
 library(dplyr)
 library(igraph)
+library(maps)
+library(ggmap)
+library(mapdata)
+library(mapproj)
+library(maptools)
+library(RColorBrewer)
+library(classInt)
+library(rgdal)
+library(scales)
 
 df00 <- read.csv("Bevolkingsontwikkeli_040617192441.csv",header = TRUE)
 #dim(df00)
@@ -172,7 +184,7 @@ df03$lat_i <- unfactor(df03$lat_i)
 df03$lon_j <- unfactor(df03$lon_j)
 df03$lat_j <- unfactor(df03$lat_j)
 
-write.csv(df03, 'df03.csv')
+write.csv(df03, 'df03_20170611.csv')
 
 # ##
 # df03_possible_duplicates <- duplicated(df03$distances)
@@ -266,116 +278,158 @@ for (i in 1:nrow(df03)){
     df03$gravity[i] <- round(((as.numeric(df03$pop_i[i]) * as.numeric(df03$pop_j[i])) / as.numeric(df03$rounded_distances[i])))
 }
 
-# chance of actual movement, as being not FAR_APART
-# note: 2 more gradients should be added for more realistic choices
+# chance of actual movement, as being not too far
+# draw edge at each distance over threshold; thresholds for now are 50000 and 100000 (m)
 # also, actual trip-duraion should be taken into acount, regardles of (spherical) lon-lat distances
-df03$far_apart <- 0
+# note: 2 more gradients should be added for more realistic choices
+
+df03$edge1 <- 2
+for (i in 1:nrow(df03))
+{
+  ifelse(
+    (as.integer(df03$rounded_distances[i]) >= as.integer(100000))
+    , df03$edge1[i] <- 0
+    , ifelse(
+      (as.integer(df03$rounded_distances[i]) < as.integer(100000))
+      , df03$edge1[i] <- 1
+      , df03$edge1[i] <- 0)
+  )
+}
+
+df03$edge2 <- 2
 for (i in 1:nrow(df03))
 {
   ifelse(
     (as.integer(df03$rounded_distances[i]) >= as.integer(50000))
-    , df03$far_apart[i] <- 1
+    , df03$edge2[i] <- 0
     , ifelse(
       (as.integer(df03$rounded_distances[i]) < as.integer(50000))
-      , df03$far_apart[i] <- 0
-      , df03$far_apart[i] <- 1)
+      , df03$edge2[i] <- 1
+      , df03$edge2[i] <- 0)
   )
 }
-
-# draw EDGE if chance present
-df03$edge <- 0
-  for (i in 1:nrow(df03)){
-    ifelse(
-      (df03$far_apart[i] == 0),
-      df03$edge[i] <- 1,
-      df03$edge[i] <- 0
-    )
-  }
 
 head(df03)
 dim(df03)
 # [1] 75078    22
 
-# new dataframes for network processing
-df04 <- data.frame(df03[,c(15,16,17,18,20,22)])
-df05 <- data.frame(df03[,c(5,6,20,22)])
+# df_check1 <- subset(df03, edge1 == 2)
+# df_check2 <- subset(df03, edge2 == 2)
+# dim(df_check1)
+# dim(df_check2)
+#[1]  0 22
 
-df_network_plot <- subset(df05, edge == 1)
+# subsetting only necessary values new dataframes for network & map plots 
+# filter only actual movements
+
+write.csv(df03, "df03_1.csv")
+
+
+############################################################################
+
+setwd("/home/bigdata09/projs/mob/")
+df03 <- read.csv("df03_1.csv",header = TRUE)
+
+df_map_plot <- data.frame(df03[,c(15,16,17,18,20,21)])
+df_map_plot <- subset(df_map_plot, edge1 == 1)
+df_map_plot <- subset(df_map_plot[, c(1,2,3,4)])
+
+df_network_plot <- data.frame(df03[,c(5,6,20,22)])
+df_network_plot <- subset(df_network_plot, edge2 == 1)
 df_network_plot <- subset(df_network_plot[,c(1,2,3)])
-df_map_plot <- subset(df04, edge == 1)
+df_network_plot$gravity <- as.integer(df_network_plot$gravity)
 
-dim(df_map_plot)
-#[1] 35244     6
-dim(df_network_plot)
-#[1] 35244     3
 
-# 75078-35244 = 39834, so a bit over 50% connections are removed
+# biofabric plot
+
+height <- vcount(df_network_plot)
+width <- ecount(df_network_plot)
+aspect <- height / width;
+plotWidth <- 100.0
+plotHeight <- plotWidth * (aspect * 1.2)
+pdf("myBioFabricOutput.pdf", width=plotWidth, height=plotHeight)
+bioFabric(bfGraph)
+dev.off()
+
+# fails! 
+apply(df_network_plot, 2, min)
+apply(df_network_plot, 2, max)
+
+# > dim(df_network_plot)
+# [1] 12521     3
+# > dim(df_map_plot)
+# [1] 35244     6
+
+
+# > head(df_map_plot)
+# from_lon from_lat   to_lon   to_lat
+# X45689.0776298777 6.153565 53.21036 6.749529 53.01048
+# X71813.6211306073 6.668492 52.36703 6.749529 53.01048
+# X87164.1919990337 6.749529 53.01048 5.658766 53.44056
+# X35226.8299801632 6.749529 53.01048 6.854422 53.32068
+# X12595.6013129436 6.564228 52.99275 6.749529 53.01048
+# X33918.3499777629 6.749529 53.01048 6.599829 53.30168
+#
+# > head(df_network_plot)
+# muni_i        muni_j gravity
+# X45689.0776298777 Aa en Hunze Achtkarspelen   15455
+# X35226.8299801632 Aa en Hunze    Appingedam    8550
+# X12595.6013129436 Aa en Hunze         Assen  135705
+# X33918.3499777629 Aa en Hunze         Bedum    7809
+# X30549.0101131924 Aa en Hunze  Bellingwedde    7386
+# X29781.0735897562 Aa en Hunze      Ten Boer    6176
 
 
 # plot from-to as directed, weighted NETWORK
 
 df_network_plot$scaled_gravity <- scale(df_network_plot$gravity, center = TRUE, scale = TRUE)
+df_network_plot$normalized_gravity <- (df_network_plot$gravity-min(df_network_plot$gravity))/(max(df_network_plot$gravity)-min(df_network_plot$gravity))
+
 
 colnames(df_network_plot)[1] <- 'from'
 colnames(df_network_plot)[2] <- 'to'
 colnames(df_network_plot)[4] <- 'weight'
 
-g_network_plot <- graph.data.frame(df_network_plot, directed=TRUE)
+net1 <- graph.data.frame(df_network_plot, directed=TRUE)
+
+plot(net, vertex.shape="none", vertex.label=V(net)$media,
+     vertex.label.font=2, vertex.label.color="gray40",
+     vertex.label.cex=.7, edge.color="gray85")
+
 
 plot(g_network_plot, edge.width=E(g_network_plot)$weight)
 
+
 # ANIMATE from-to flow
-# add paths as 
+
+df_map_plot$group <-1
+df_map_plot$id <- rep(1:35244)
+
+df_map_plot <- df_map_plot[,c("id","from_lon","from_lat","to_lon","to_lat","group")]
+
 
 endpoints <- df_map_plot[,c("from_lon","from_lat","to_lon","to_lat")] 
 paths_flat <- gc_paths(arcs_flat, "group", size = 5)
 
-
-# take a weighted sample, e.g., favoring larger averaged populations and shorter distances
-endpoints <- mutate(endpoints, Dist_wts = distFun(Dist))
-endpoints <- sample_n(endpoints, 500, replace = TRUE, weight = (Pop_wts0 + Pop_wts1)/2 + Dist_wts)
-
 # expand data frame from endpoints to arcs, each composed of a sequence of points
-arcs_flat <- gc_arcs(endpoints, "lon0", "lat0", "lon1", "lat1", breakAtDateLine = TRUE)
-arcs_globe <- gc_arcs(endpoints, "lon0", "lat0", "lon1", "lat1")
 
 n <- max(paths_flat$id)
 png.args <- list(width = 600, height = 300, bg = "black")
 clrs <- c("#1E90FF50", "#FFFFFF50", "#FFFFFF", "#1E90FF75")
-ylm <- range(paths_flat$lat)  # trimming empty southern map region
+#ylm <- range(paths_flat$lat)  # trimming empty southern map region
 
 save_seq(paths_flat, id = "id", n.frames = n, ortho = FALSE, type = "network",
          file = "network2D", png.args = png.args)
-
 
 gglist <- save_seq(paths_globe, id = "id", n.frames = n, col = clrs, type = "network",
                    
                     
 # rank by distane,
-> df03$round_distance[order(population$age),c(1,2)]
-
-df031 <- order(df03$round_distances))
-df032 <- df031[,c(X,Y,Z)]
-
-
-#
-
-
-
-
+# dfX <- order(df03$rounded_distances))
 
 # script adapted from https://github.com/asheshwor/mapping-location-history/blob/master/mapping_google_history.r
 
-#Load packages
-library(maps)
-library(ggmap)
-library(mapdata)
-library(mapproj)
-library(maptools)
-library(RColorBrewer)
-library(classInt)
-library(rgdal)
-library(scales)
+
 #Setting up directory and file list
 dirName <- "//ASH-desktop/Users/asheshwor/Documents/R_git/history_KML/"
 fileList <- c(dir(dirName))
