@@ -1,6 +1,10 @@
 
 # set wd, load libs, read initial csv into dataframe
 setwd("/x/y/z/")
+
+
+# set wd, load libs, read initial csv into dataframe
+setwd("/home/bigdata09/projs/mob/")
 #install.packages(“ggplot2″)
 #install.packages(“jsonlite”)
 #install.packages(“plyr”)
@@ -21,21 +25,50 @@ geo <- read.csv("geocodes.csv",header=TRUE)
 df01 <- data.frame(df01[,1:2],geo)
 df01 <- df01[,-c(3)]
 
+# > min(df01[,2])
+# [1] 946
+# > min(df01[,2])
+# [1] 946
+
+# normal_pop <- (df01$population_01042017-min(df01$population_01042017))/(max(df01$population_01042017)-min(df01$population_01042017))
+# hst <- hist(df01$population_01042017, breaks = 120, xaxt="n")
+# axis(side=1, at=axTicks(1), labels=formatC(axTicks(1), format="d", digits = 11, big.mark=','))
+
 # rename variable-names for clarity
 colnames(df01)[1] <- "municipality"
 colnames(df01)[2] <- "population_01042017"
 colnames(df01)[3] <- "longitude"
 colnames(df01)[4] <- "latitude"
 
-#head(df01)
-#     municipality population_01042017 longitude latitude
-# 1   Aa en Hunze               25294  6.749528 53.01048
-# 2       Aalburg               13061  5.057085 51.75129
-# 3      Aalsmeer               31393  4.750244 52.26064
-# 4        Aalten               27134  6.580678 51.92667
 
+df01$population_01042017 <- as.integer(df01$population_01042017)
+
+df01$pop_10e5_20e5 <- 10
+for (i in 1:nrow(df01)){
+  ifelse(
+    ((df01$population_01042017[i] >= as.integer(100000)) && (df01$population_01042017 < as.integer(200000))) 
+    , df01$pop_10e5_20e5[i] <- 1  
+    , ifelse(
+      ((df01$population_01042017[i] >= as.integer(200000)) || (df01$population_01042017 < as.integer(100000)))
+      , df01$pop_10e5_20e5[i] <- 0
+      , df01$pop_10e5_20e5[i] <- 1)
+  )
+}
+
+df01$pop_over_20e5 <- 10
+for (i in 1:nrow(df01)){
+  ifelse(
+    (df01$population_01042017[i] >= as.integer(200000))
+    , df01$pop_over_20e5[i] <- 1
+    , ifelse(
+      (df01$population_01042017[i] < as.integer(200000))
+      , df01$pop_over_20e5[i] <- 0
+      , df01$pop_over_20e5[i] <- 1)
+  )
+} 
+ 
 #dim(df01)
-# [1] 388   4
+# [1] 388   6
 
 # create a distance matrix from two lists (-1 on both first and last city-row)
 l1 <- data.frame(longitude = df01[1:387,3],
@@ -97,18 +130,30 @@ compared_populations <- data.frame(combn(as.character(df01$population_01042017),
 combined_lonlats <- paste(df01$longitude, df01$latitude, sep = ",")
 compared_locations <- data.frame(combn(as.character(combined_lonlats), 2, FUN = paste, collapse="_"))
 
+
+# big cities
+comb_pop_10e5_20e5 <- data.frame(combn(as.character(df01$op_10e5_20e5), 2, FUN = paste, collapse="_"))
+comb_pop_over_20e5 <- data.frame(combn(as.character(df01$comb_pop_over_20e5), 2, FUN = paste, collapse="_"))
+ 
+
 # ------------ new dataframe ------------
 
 # into a new dataframe, should be 75078x4
 df011 <- data.frame(compared_municipalities, distances)
 df012 <- data.frame(df011, compared_populations)
-df02 <- data.frame(df012, compared_locations)
+df013 <- data.frame(df012, compared_locations)
+df014 <- data.frame(df013, comb_pop_10e5_20e5)
+df02 <- data.frame(df014, comb_pop_over_20e5)
+ 
 
 # rename column names
 colnames(df02)[1] <- "compared_municipalities"
 colnames(df02)[2] <- "distances"
 colnames(df02)[3] <- "compared_populations"
 colnames(df02)[4] <- "compared_locations"
+colnames(df02)[5] <- "comb_pop_10e5_20e5"
+colnames(df02)[6] <- "comb_pop_over_20e5"
+
 
 # make seperate lists with split-up's of compared variables
  
@@ -121,9 +166,18 @@ lcp2 <- data.frame(t(lcp))
 lcl <- data.frame(strsplit(as.character(df02$compared_locations), '_'))
 lcl2 <- data.frame(t(lcl))
 
+lcbc1020 <- data.frame(strsplit(as.character(df02$comb_pop_10e5_20e5), '_'))
+lcbc10202 <- data.frame(t(lcbc1020))
+  
+lcbc20up <- data.frame(strsplit(as.character(df02$comb_pop_over_20e5), '_'))
+lcbc20up2 <- data.frame(strsplit(t(lcbc20up))
+  
+  
 df020 <- data.frame(df02, lcm2)
 df021 <- data.frame(df020, lcp2)
 df022 <- data.frame(df021, lcl2)
+df023 <- data.frame(df022, lcbc10202)
+df024 <- data.frame(df023, lcbc20up2)
 
 colnames(df022)[1] <- "compared_municipalities"
 colnames(df022)[2] <- "distances"
@@ -135,19 +189,16 @@ colnames(df022)[7] <- "pop_i"
 colnames(df022)[8] <- "pop_j"
 colnames(df022)[9] <- "lonlat_i"
 colnames(df022)[10] <- "lonlat_j"
-
-lcl_lons <- data.frame(strsplit(as.character(df022$lonlat_i), ','))
-lcl_lons2 <- data.frame(t(lcl_lons), stringsAsFactors = TRUE)
-lcl_lats <- data.frame(strsplit(as.character(df022$lonlat_j), ','))
-lcl_lats2 <- data.frame(t(lcl_lats), stringsAsFactors = TRUE)
+colnames(df022)[11] <- "comb_pop_10e5_20e5"
+colnames(df022)[12] <- "comb_pop_over_20e5"
 
 df023 <- data.frame(lcl_lons2, lcl_lats2)
-df03 <- data.frame(df022, df023)
+df03 <- data.frame(df024, df023)
   
-colnames(df03)[11] <- "lon_i"
-colnames(df03)[12] <- "lat_i"
-colnames(df03)[13] <- "lon_j"
-colnames(df03)[14] <- "lat_j"
+colnames(df03)[13] <- "lon_i"
+colnames(df03)[14] <- "lat_i"
+colnames(df03)[15] <- "lon_j"
+colnames(df03)[16] <- "lat_j"
  
 # something about the r inferno.
 df03$muni_i <- as.character(df03$muni_i)
@@ -165,7 +216,7 @@ df03$lat_i <- unfactor(df03$lat_i)
 df03$lon_j <- unfactor(df03$lon_j)
 df03$lat_j <- unfactor(df03$lat_j)
 
-write.csv(df03, 'df03_20170611.csv')
+write.csv(df03, 'df03_20170612.csv')
 
 # ##
 # df03_possible_duplicates <- duplicated(df03$distances)
@@ -203,10 +254,10 @@ write.csv(df03, 'df03_20170611.csv')
 df03$from_lon <- 10
 for (i in 1:nrow(df03)){
   ifelse(
-    (df03$pop_i[i] > df03$pop_j[i])
+    (df03$pop_i[i] < df03$pop_j[i])
     , df03$from_lon[i] <- df03$lon_i[i]
       , ifelse(
-        (df03$pop_i[i] < df03$pop_j[i])
+        (df03$pop_i[i] > df03$pop_j[i])
         , df03$from_lon[i] <- df03$lon_j[i]
         , df03$from_lon[i] <- 0)
   )
@@ -290,6 +341,19 @@ for (i in 1:nrow(df03))
   )
 }
 
+df03$below_10e5 <- 2
+for (i in 1:nrow(df03))
+{
+  ifelse(
+    ((as.integer(df03$comb_pop_10e5_20e5[i]) == as.integer(0)) && ((as.integer(df03$comb_pop_over_20e5[i]) == as.integer(0)))
+    , df03$edge2[i] <- 1
+    , ifelse(
+      (as.integer(df03$comb_pop_10e5_20e5[i]) == as.integer(1)) || ((as.integer(df03$comb_pop_over_20e5[i]) == as.integer(1)))
+      , df03$edge2[i] <- 0
+      , df03$edge2[i] <- 1)
+  )
+}
+
 head(df03)
 dim(df03)
 # [1] 75078    22
@@ -303,10 +367,16 @@ dim(df03)
 # subsetting only necessary values new dataframes for network & map plots 
 # filter only actual movements
 
-write.csv(df03, "df03_2.csv")
+write.csv(df03, "df03_3.csv")
 
 
 ############################################################################
+install.packages('igraph')
+install.packages('network') 
+install.packages('sna')
+install.packages('ndtv')
+install.packages('visNetwork')
+
 
 library(RJSONIO)
 library(ggmap)
@@ -317,6 +387,10 @@ library(varhandle)
 library(mapmate)
 library(dplyr)
 library(igraph)
+library(network)
+library(sna)
+library(ndtv)
+library(visNetwork)
 library(maps)
 library(ggmap)
 library(mapdata)
@@ -330,17 +404,17 @@ library(raster)
 library(RBioFabric)
 library(HiveR)
 
-setwd("/home/bigdata09/projs/mob/")
-df04 <- read.csv("df03_2.csv",header = TRUE)
+# setwd("/home/bigdata09/projs/mob/")
+# df04 <- read.csv("df03_2.csv",header = TRUE)
 
-df_map_plot <- data.frame(df04[,c(6,7,16,17,18,19,21,22)])
+df_map_plot <- data.frame(df04[,c(6,7,16,17,18,19,21,22,23,24,25)])
 df_map_plot <- subset(df_map_plot, edge1 == 1)
 #df_map_plot <- subset(df_map_plot[, c(1,2,3,4)])
 
 df_map$gravity <- as.integer(df_map$gravity)
 df_map$normalized_gravity <- (df_map$gravity-min(df_map$gravity))/(max(df_map$gravity)-min(df_map$gravity))
 df_map_s2 <- subset(df_map, normalized_gravity > 0.01)
-df_map <- df_map_plot
+df_map <- df_map_plot 
 df_map$gravity <- as.integer(df_map$gravity)
 df_map$normalized_gravity <- (df_map$gravity-min(df_map$gravity))/(max(df_map$gravity)-min(df_map$gravity))
 df_map_s2 <- subset(df_map, normalized_gravity > 0.02)
@@ -362,6 +436,35 @@ df_network_plot3 <- df_network_plot2[,c(1,2,5)]
 # plot(d, main="Kernel Density of normalized_gravity)")
 # polygon(d, col="red", border="blue")
 
+pdf(file="ArialBlack.pdf")
+plot(x=10:1, y=10:1, pch=19, cex=6, main="This is a plot", col="orange", family="Arial Black" )
+dev.off()
+
+colrs <- c("gray50", "tomato", "gold")
+V(net)$color <- colrs[V(net)$media.type]
+
+# Compute node degrees (#links) and use that to set node size:
+deg <- degree(net, mode="all")
+V(net)$size <- deg*3
+# We could also use the audience size value:
+V(net)$size <- V(net)$audience.size*0.6
+
+# The labels are currently node IDs.
+# Setting them to NA will render no labels:
+V(net)$label <- NA
+
+# Set edge width based on weight:
+E(net)$width <- E(net)$weight/6
+
+#change arrow size and edge color:
+E(net)$arrow.size <- .2
+E(net)$edge.color <- "gray80"
+E(net)$width <- 1+E(net)$weight/12
+plot(net) 
+
+
+
+ 
 nl <- getData('GADM', country='NLD', level=1)
 df<-data.frame("from" = df_map_s2$muni_i, 
                "to"= df_map_s2$muni_j)
@@ -372,6 +475,44 @@ g_m <- graph.data.frame(df, directed=T)
 lo <- as.matrix(meta[,2:3])
 plot(nl)
 plot(g_m, layout=lo, add = TRUE, rescale = FALSE)
+
+library(igraph)
+#import the sample_adjmatrix file:
+dat=read.csv(XXXX,header=TRUE,row.names=1,check.names=FALSE)
+m=as.matrix(dat)
+net=graph.adjacency(m,mode="directed",weighted=NULL,diag=FALSE)
+# show the names of the vertices you just imported:
+V(net)$name
+
+#the result will be:
+#[1] "23732" "23778" "23824" "23871" "58009" "58098" "58256"
+#import the sample_attributes
+a=read.csv(file.choose())
+V(net)$Sex=as.character(a$Sex[match(V(net)$name,a$Bird.ID)]) # This code says to create a vertex attribute called "Sex" by extracting the value of the column "Sex" in the attributes file when the Bird ID number matches the vertex name.
+V(net)$Sex # This will print the new vertex attribute, "Sex"
+# and you will get:
+#[1] "F" "M" "M" "F" "F" "M" "M"
+
+V(net)$color=V(net)$Sex #assign the "Sex" attribute as the vertex color
+V(net)$color=gsub("F","red",V(net)$color) #Females will be red
+V(net)$color=gsub("M","blue",V(net)$color) #Males will be blue
+plot.igraph(net,vertex.label=NA,layout=layout.fruchterman.reingold)
+
+V(net)$size=degree(net)*5 #because 1 is a small size for a node, I'm just multiplying it by 5
+plot.igraph(net,vertex.label=NA,layout=layout.fruchterman.reingold)
+
+library(igraph)
+#import the sample_adjmatrix file:
+dat=read.csv(file.choose(),header=TRUE,row.names=1,check.names=FALSE)
+m=as.matrix(dat)
+net=graph.adjacency(m,mode="undirected",weighted=NULL,diag=FALSE)
+#import the sample_attributes
+a=read.csv(file.choose())
+nodecolor=as.character(a$Sex[match(V(net)$name,a$Bird.ID)])
+nodecolor=gsub("F","red",nodecolor)
+nodecolor=gsub("M","blue",nodecolor)
+nodesize=degree(net)*5
+plot.igraph(net,vertex.label=NA,layout=layout.fruchterman.reingold, vertex.color=nodecolor,vertex.size=nodesize)
 
 png(filename = "net2.png", height = 800, width = 800)
 plot(nl)
@@ -410,7 +551,7 @@ width <- ecount(g)
 aspect <- height / width;
 plotWidth <- 600.0
 plotHeight <- plotWidth * (aspect * 1.2)
-pdf("biofabric1.pdf", width=plotWidth, height=plotHeight)
+png("biofabric1.png", width=plotWidth, height=plotHeight)
 bioFabric(g)
 dev.off()
 
@@ -580,6 +721,10 @@ df02 <- cbind(dist_names,distances,compared_populations)
 # 369          De Wolden               23789        NA       NA
 
 # dfx <- df01[is.na(df01$longitude),]
+
+
+
+
 
 
 
