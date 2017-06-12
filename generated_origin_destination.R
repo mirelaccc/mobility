@@ -1,10 +1,6 @@
 
 # set wd, load libs, read initial csv into dataframe
 setwd("/x/y/z/")
-
-
-# set wd, load libs, read initial csv into dataframe
-setwd("/home/bigdata09/projs/mob/")
 #install.packages(“ggplot2″)
 #install.packages(“jsonlite”)
 #install.packages(“plyr”)
