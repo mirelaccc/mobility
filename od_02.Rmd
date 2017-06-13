@@ -1,11 +1,36 @@
-
-
  
 # Start: read in data, load libs -> df01
 ```{r}
  
 # set wd, load libs, read initial csv into dataframe
-setwd("/home/bigdata09/projs/mob/")
+setwd("/x/y/z/")
+
+library(RJSONIO)
+library(ggmap)
+library(geosphere)
+library(data.table)
+library(gdata)
+library(varhandle)
+library(mapmate)
+library(dplyr)
+library(igraph)
+library(network)
+library(sna)
+library(ndtv)
+library(visNetwork)
+library(maps)
+library(ggmap)
+library(mapdata)
+library(mapproj)
+library(maptools)
+library(RColorBrewer)
+library(classInt)
+library(rgdal)
+library(scales)
+library(raster)
+library(RBioFabric)
+library(HiveR)
+
 
 df00 <- read.csv("Bevolkingsontwikkeli_040617192441.csv",header = TRUE)
 #dim(df00)
@@ -39,13 +64,24 @@ colnames(df01)[4] <- "latitude"
 
 df01$population_01042017 <- as.integer(df01$population_01042017)
 
-df01$pop_01 <- ( (df01$population_01042017 - min(df01$population_01042017)) 
+df01$pop_norm <- ( (df01$population_01042017 - min(df01$population_01042017)) 
                / (max (df01$population_01042017) - min(df01$population_01042017)) )
 
-# hst1 <- hist(df01$population_01042017, breaks = 120, xaxt="n")
+
+# quantile(df01$population_01042017)
+#          0%       25%        50%      75%     100% 
+#      946.00  17847.25  26911.50  44508.25 853312.00 
+#
+# quantile(df01$pop_norm)
+#         0%        25%        50%        75%       100% 
+# 0.00000000 0.01982863 0.03046285 0.05110745 1.00000000 
+        
+# hst1 <- hist(df01$population_01042017, breaks =   120, xaxt="n")
 # axis(side=1, at=axTicks(1), labels=formatC(axTicks(1), format="d", digits = 11, big.mark=','))
 # hst2 <- hist(df01$pop_01, breaks = 20, xaxt="n")
 # axis(side=1, at=axTicks(1), labels=formatC(axTicks(1), format="d", digits = 11, big.mark=','))
+
+
 
 df01$pop_10e5_20e5 <- 20
 for (i in 1:nrow(df01)){
@@ -94,9 +130,7 @@ for (i in 1:nrow(df01)){
  
 ```
 
-
 # Matrix, removal of double 'edges', transposing, etc
-
 ```{r}
 
 # create a distance matrix from two lists (-1 on both first and last city-row)
@@ -137,7 +171,6 @@ distances <- data.frame(dists4)
 ```
 
 # Get all 'pairwise' combinations; combine all variables and split for further comparison
-
 ```{r}
 # dataframe should (row-wise) increase from 388 to 75078 (see above)
 # get X-combinations per Y w/ 'combn' and split into seperate variables
@@ -236,24 +269,15 @@ colnames(df03)[16] <- "lat_j"
 
 ```
 
-```{Plots}
-
-plot(z)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
-
+ 
 
 ```{backups etc}
-
-
 
 #install.packages(“ggplot2″)
 #install.packages(“jsonlite”)
 #install.packages(“plyr”)
 #install_github("leonawicz/mapmate")
 #install_github("wjrl/RBioFabric")
-
 
 
 ```
