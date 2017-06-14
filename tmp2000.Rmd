@@ -1,0 +1,366 @@
+
+
+# Measurement along the way
+```{r}
+
+# > nrow(subset(df01, df01$population_01042017 > 100000))
+# [1] 31
+# > head(subset(df01, df01$population_01042017 > 100000))
+#           municipality population_01042017 longitude latitude  pop_norm
+# 8              Alkmaar              108618  4.753375 52.63238 0.1263213
+# 10              Almere              201703  5.264702 52.35078 0.2355291
+# 11 Alphen aan den Rijn              109107  4.668851 52.12766 0.1268950
+# 14          Amersfoort              154712  5.387827 52.15611 0.1803990
+# 16           Amsterdam              853312  4.895168 52.37022 1.0000000
+# 17           Apeldoorn              160497  5.969923 52.21116 0.1871860
+# 
+# > nrow(subset(df01, df01$population_01042017 > 200000))
+# [1] 8
+# > head(subset(df01, df01$population_01042017 > 200000))
+#                 municipality population_01042017 longitude latitude  pop_norm
+# 10                    Almere              201703  5.264702 52.35078 0.2355291
+# 16                 Amsterdam              853312  4.895168 52.37022 1.0000000
+# 95                 Eindhoven              227100  5.469722 51.44164 0.2653250
+# 120 's-Gravenhage (gemeente)              526439  4.300700 52.07050 0.6165110
+# 121     Groningen (gemeente)              202250  6.551335 53.23239 0.2361708
+# 281                Rotterdam              639587  4.477733 51.92442 0.7492568
+# 
+# > nrow(subset(df01, df01$population_01042017 > 500000))
+# [1] 3
+# > head(subset(df01, df01$population_01042017 > 500000))
+#                 municipality population_01042017 longitude latitude  pop_norm
+# 16                 Amsterdam              853312  4.895168 52.37022 1.0000000
+# 120 's-Gravenhage (gemeente)              526439  4.300700 52.07050 0.6165110
+# 281                Rotterdam              639587  4.477733 51.92442 0.7492568
+
+
+# quantile(df01$pop_population_01042017)
+#          0%       25%        50%      75%     100% 
+#      946.00  17847.25  26911.50  44508.25 853312.00 
+#
+# quantile(df01$pop_norm)
+#         0%        25%        50%        75%       100% 
+# 0.00000000 0.01982863 0.03046285 0.05110745 1.00000000 
+
+
+
+```
+ 
+# Start: set wd, read in data, load libs -> df01
+```{r}
+
+setwd("/home/bigdata09/projs/mob/")
+
+library(RJSONIO)
+library(ggmap)
+library(geosphere)
+library(data.table)
+library(gdata)
+library(varhandle)
+library(mapmate)
+library(dplyr)
+library(igraph)
+library(network)
+library(sna)
+library(ndtv)
+library(visNetwork)
+library(maps)
+library(ggmap)
+library(mapdata)
+library(mapproj)
+library(maptools)
+library(RColorBrewer)
+library(classInt)
+#library(rgdal)
+library(scales)
+library(raster)
+library(RBioFabric)
+library(HiveR)
+
+df00 <- read.csv("Bevolkingsontwikkeli_040617192441.csv",header = TRUE)
+#dim(df00)
+# [1] 388  17
+
+# get only the location-name and population variables
+df01 <- df00[1:388,c(1,17)]
+
+# get lon & lat values from google maps api from each municipality based on location names
+#geocodes <- geocode(as.character(df01$Regio.s))
+#write.csv(geocodes,"geocodes.csv")
+geo <- read.csv("geocodes.csv",header=TRUE)
+df01 <- data.frame(df01[,1:2],geo)
+df01 <- df01[,-c(3)]
+
+# > min(df01[,2])
+# [1] 946
+# > min(df01[,2])
+# [1] 946
+
+```
+
+# First renaming and processing (normalizing population, adding 3 city-size variables)
+
+```{r}
+
+colnames(df01)[1] <- "municipality"
+colnames(df01)[2] <- "population_01042017"
+colnames(df01)[3] <- "longitude"
+colnames(df01)[4] <- "latitude"
+
+df01$population_01042017 <- as.integer(df01$population_01042017)
+
+df01$pop_norm <- ( (df01$population_01042017 - min(df01$population_01042017)) 
+                 / (max(df01$population_01042017) - min(df01$population_01042017)) )
+ 
+# par(mfrow=c(2,2))
+# hist(df01$population_01042017, breaks = 80)
+# #png(filename= "hist_pop_norm.png",height = 600, width = 600)
+# hist(df01$pop_norm, breaks = 80)
+# #png(filename= "hist_q_pop_real.png",height = 600, width = 600)
+# hist(quantile(df01$population_01042017), breaks = 80)
+# #png(filename= "hist_q_pop_norm.png",height = 600, width = 600)
+# hist(quantile(df01$pop_norm), breaks = 80)
+# png(filename= "hists_pop.png", width =800,height=800)
+# dev.off()
+# 
+# # hst1 <- hist(df01$population_01042017, breaks =   120, xaxt="n")
+# # axis(side=1, at=axTicks(1), labels=formatC(axTicks(1), format="d", digits = 11, big.mark=','))
+# hst2 <- hist(df01$pop_norm, breaks = 120, xaxt="n")
+# axis(side=1, at=axTicks(1), labels=formatC(axTicks(1), format="d", digits = 11, big.mark=','))
+
+# all 3 df df01$ [pop_10e5_20e5, pop_over_20e5,pop_under_10e5] 
+for (){
+    df01$pop_10e5_20e5 <- 20
+    for (i in 1:nrow(df01)){
+    ifelse(
+      ((df01$population_01042017[i] >= as.integer(100000)) && (df01$population_01042017 < as.integer(200000))) 
+      , df01$pop_10e5_20e5[i] <- 1  
+      , ifelse(
+        ((df01$population_01042017[i] >= as.integer(200000)) || (df01$population_01042017 < as.integer(100000)))
+        , df01$pop_10e5_20e5[i] <- 0
+        , df01$pop_10e5_20e5[i] <- 1)
+    )}
+    df01$pop_over_20e5 <- 20
+    for (i in 1:nrow(df01)){
+    ifelse(
+      (df01$population_01042017[i] >= as.integer(200000))
+      , df01$pop_over_20e5[i] <- 1
+      , ifelse(
+        (df01$population_01042017[i] < as.integer(200000))
+        , df01$pop_over_20e5[i] <- 0
+        , df01$pop_over_20e5[i] <- 1)
+    )} 
+    df01$pop_under_10e5 <- 20
+    for (i in 1:nrow(df01)){
+    ifelse(
+      ((as.integer(df01$pop_10e5_20e5[i]) == as.integer(0))
+       && (as.integer(df01$pop_over_20e5[i]) == as.integer(0)))
+      , df01$pop_under_10e5[i] <- 1
+      , ifelse(
+        ((as.integer(df01$pop_10e5_20e5[i]) == as.integer(1))
+         || (as.integer(df01$pop_over_20e5[i]) == as.integer(1)))
+        , df01$pop_under_10e5[i] <- 0
+        , df01$pop_under_10e5[i] <- 1)
+    )}
+}
+
+for(
+   df01$pop_norm_0102 <- 20
+    for (i in 1:nrow(df01)){
+    ifelse(
+      ((as.numeric(df01$pop_norm)[i] >= as.numeric(0.1)) && (as.numeric(df01$pop_norm) < as.numeric(0.2))) 
+      , df01$pop_norm_0102[i] <- 1  
+      , ifelse(
+        ((as.numeric(df01$pop_norm)[i] >= as.numeric(0.2)) || (as.numeric(df01$pop_norm) < as.numeric(0.1)))
+        , df01$pop_norm_0102[i] <- 0
+        , df01$pop_norm_0102[i] <- 1)
+    )}
+    df01$pop_norm_02up <- 20
+    for (i in 1:nrow(df01)){
+    ifelse(
+      (as.numeric(df01$pop_norm)[i] >= as.numeric(0.2))
+      , df01$pop_norm_02up[i] <- 1
+      , ifelse(
+        (as.numeric(df01$pop_norm)[i] < as.numeric(0.2))
+        , df01$pop_norm_02up[i] <- 0
+        , df01$pop_norm_02up[i] <- 1)
+    )} 
+    df01$pop_norm_below01 <- 20
+    for (i in 1:nrow(df01)){
+    ifelse(
+      ((as.integer(df01$pop_norm_0102[i]) == as.integer(0))
+       && (as.integer(df01$pop_norm_02up[i]) == as.integer(0)))
+      , df01$pop_norm_below01[i] <- 1
+      , ifelse(
+        ((as.integer(df01$pop_norm_0102[i]) == as.integer(1))
+         || (as.integer(df01$pop_norm_02up[i]) == as.integer(1)))
+        , df01$pop_norm_below01[i] <- 0
+        , df01$pop_norm_below01[i] <- 1)
+    )}
+} 
+
+ 
+```
+
+# Matrix, removal of double 'edges', transposing, etc
+```{r}
+
+# create a distance matrix from two lists (-1 on both first and last city-row)
+l1 <- data.frame(longitude = df01[1:387,3],
+                 latitude = df01[1:387,4])
+l2 <- data.frame(longitude = df01[2:388,3],
+                 latitude = df01[2:388,4])
+mtx <- distm(l1[,c('longitude','latitude')], l2[,c('longitude','latitude')], fun=distVincentyEllipsoid)
+
+#dim(mtx)
+# [1] 387 387
+# elements in mtx = 149769
+# checked: 387*387 = 149769
+
+# remove duplicates and 'eigen'-distances
+mtx[lower.tri(mtx)] <- NA
+#head(mtx)
+#         [,1]      [,2]     [,3]      [,4]      [,5]      [,6]
+# [1,] 181411 158998.75 121147.8  45689.08 189958.68 204965.68
+# [2,]     NA  60463.11 106807.8 178628.27  29788.73  46693.60
+# [3,]     NA        NA 130832.1 141961.74  43773.50  51019.39
+# [4,]     NA        NA       NA 145751.95 131649.72 150232.45
+#dim(mtx)
+# [1] 387 387
+
+# transpose as quick-fix for correct iteration direction in as.list
+mx <- t(mtx)
+dists <- as.list(mx)
+dists2 <- dists[!is.na(dists)]
+dists3 <- data.frame(dists2)
+dists4 <- t(dists3)
+distances <- data.frame(dists4)
+
+# dim(distances)
+# [1] 75078     1
+# checked: 149769 + 387 / 2 = 75078
+
+```
+
+# Get all 'pairwise' combinations; combine all variables and split for further comparison
+```{r}
+# dataframe should (row-wise) increase from 388 to 75078 (see above)
+# get X-combinations per Y w/ 'combn' and split into seperate variables
+
+# reorde cols for better overview
+df011 <- df01[,c(1,3,4,2,5,8,6,7,11,9,10)]
+
+# municipalities
+compared_municipalities <- data.frame(combn(as.character(df01$municipality), 2, FUN = paste, collapse="_"))
+# locations 
+combined_lonlats <- paste(df01$longitude, df01$latitude, sep = ",")
+compared_locations <- data.frame(combn(as.character(combined_lonlats), 2, FUN = paste, collapse="_"))
+
+# populations
+compared_pop <- data.frame(combn(as.character(df01$population_01042017), 2, FUN = paste, collapse="_"))
+compared_pop_norm <- data.frame(combn(as.character(df01$pop_norm), 2, FUN = paste, collapse="_"))
+compared_pop_under_10e5 <- data.frame(combn(as.character(df01$pop_under_10e5), 2, FUN = paste, collapse="_"))
+compared_pop_10e5_20e5 <- data.frame(combn(as.character(df01$pop_10e5_20e5), 2, FUN = paste, collapse="_"))
+compared_pop_over_20e5 <- data.frame(combn(as.character(df01$pop_over_20e5), 2, FUN = paste, collapse="_"))
+compared_pop_norm_below01 <- data.frame(combn(as.character(df01$pop_norm_below01), 2, FUN = paste, collapse="_")) 
+compared_pop_norm_0102 <- data.frame(combn(as.character(df01$pop_norm_0102), 2, FUN = paste, collapse="_")) 
+compared_pop_norm_02up <- data.frame(combn(as.character(df01$pop_norm_02up), 2, FUN = paste, collapse="_")) 
+
+Reduce(function(x, y) merge(x, y, all=TRUE), list(compared_municipalities, compared_locations, compared_pop, compared_pop_norm, compared_pop_under_10e5, compared_pop_10e5_20e5, compared_pop_over_20e5, compared_pop_norm_below01, compared_pop_norm_0102, compared_pop_norm_02up))
+
+
+# # into a new dataframe, should be 75078x6
+# df011 <- data.frame(compared_municipalities, distances)
+# df012 <- data.frame(df011, compared_populations)
+# df013 <- data.frame(df012, compared_pop_01)
+# df014 <- data.frame(df013, compared_locations)
+# df015 <- data.frame(df014, pop_under_10e5)
+# df016 <- data.frame(df015, comb_pop_10e5_20e5)
+# df02 <- data.frame(df016, comb_pop_over_20e5)
+
+# rename column names
+colnames(df02)[1] <- "compared_municipalities"
+colnames(df02)[2] <- "distances"
+colnames(df02)[3] <- "compared_populations"
+colnames(df02)[4] <- "compared_pop_01"
+colnames(df02)[5] <- "compared_locations"
+colnames(df02)[6] <- "comb_pop_under_10e5"
+colnames(df02)[7] <- "comb_pop_10e5_20e5"
+colnames(df02)[8] <- "comb_pop_over_20e5"
+
+
+# make seperate lists with split-up's of compared variables
+
+# munis
+lcm <- data.frame(strsplit(as.character(df02$compared_municipalities), '_'))
+lcm2 <- data.frame(t(lcm))
+
+# pops
+lcp <- data.frame(strsplit(as.character(df02$compared_populations), '_'))
+lcp2 <- data.frame(t(lcp))
+lcp01 <- data.frame(strsplit(as.character(df02$compared_pop_01), '_'))
+lcp012 <- data.frame(t(lcp01))
+
+# locs
+lcl <- data.frame(strsplit(as.character(df02$compared_locations), '_'))
+lcl2 <- data.frame(t(lcl))
+
+# pop scales
+lccunder10 <- data.frame(strsplit(as.character(df02$comb_pop_under_10e5), '_'))
+lccunder102 <- data.frame(t(lccunder10))
+lcc1020 <- data.frame(strsplit(as.character(df02$comb_pop_10e5_20e5), '_'))
+lcc10202 <- data.frame(t(lcbc1020))
+lcc20up <- data.frame(strsplit(as.character(df02$comb_pop_over_20e5), '_'))
+lcc20up2 <- data.frame(strsplit(t(lcbc20up)))
+  
+# merge back into one dataframe
+df020 <- data.frame(df02, lcm2)
+df021 <- data.frame(df020, lcp2)
+df022 <- data.frame(df021, lcp012)
+df023 <- data.frame(df022, lcl2)
+df024 <- data.frame(df023, lccunder102)
+df025 <- data.frame(df024, lcc10202)
+df026 <- data.frame(df025, lcc20up2)
+
+colnames(df026)[1] <- "compared_municipalities"
+colnames(df026)[2] <- "distances"
+colnames(df026)[3] <- "compared_populations"
+colnames(df026)[4] <- "compared_normal_populations"
+colnames(df026)[5] <- "compared_locations"
+colnames(df026)[6] <- "muni_i"
+colnames(df026)[7] <- "muni_j"
+colnames(df026)[8] <- "pop_i"
+colnames(df026)[9] <- "pop_j"
+colnames(df026)[10] <- "lonlat_i"
+colnames(df026)[11] <- "lonlat_j"
+colnames(df026)[12] <- "comb_pop_under_10e5"
+colnames(df026)[13] <- "comb_pop_10e5_20e5"
+colnames(df026)[14] <- "comb_pop_over_20e5"
+
+df027 <- data.frame(lcl_lons2, lcl_lats2)
+df03 <- data.frame(df026, df025)
+  
+colnames(df03)[13] <- "lon_i"
+colnames(df03)[14] <- "lat_i"
+colnames(df03)[15] <- "lon_j"
+colnames(df03)[16] <- "lat_j"
+
+```
+
+ 
+
+
+
+```{backups etc}
+
+
+
+#install.packages(“ggplot2″)
+#install.packages(“jsonlite”)
+#install.packages(“plyr”)
+#install_github("leonawicz/mapmate")
+#install_github("wjrl/RBioFabric")
+
+
+
+```
