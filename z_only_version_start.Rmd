@@ -1,0 +1,166 @@
+
+# 1 - First renaming and processing (normalizing population, adding 3 city-size variables)
+```{r}
+
+colnames(df01)[1] <- "municipality"
+colnames(df01)[2] <- "population_01042017"
+colnames(df01)[3] <- "longitude"
+colnames(df01)[4] <- "latitude"
+
+df01$population_01042017 <- as.integer(df01$population_01042017)
+
+# easier for comparison, and slightly anonimized
+df01$pop_round_100 <- round(df01$population_01042017 / 100)
+pop_round_100 <- round(df01$population_01042017 / 100)
+df01$pop_z <- scale(df01$pop_round_100, center = TRUE, scale = TRUE)
+
+# all 3 df df01$ [pop_10e5_20e5, pop_over_20e5,pop_under_10e5] 
+    df01$pop_z_1020 <- 20
+    for (i in 1:nrow(df01)){
+    ifelse(
+      ((df01$pop_z[i] >= as.integer(1)) && (df01$pop_z < as.integer(2))) 
+      , df01$pop_z_1020[i] <- 1  
+      , ifelse(
+        ((df01$pop_z[i] >= as.integer(2)) || (df01$pop_z < as.integer(1)))
+        , df01$pop_z_1020[i] <- 0
+        , df01$pop_z_1020[i] <- 1)
+    )}
+    df01$pop_z_20u <- 20
+    for (i in 1:nrow(df01)){
+    ifelse(
+      (df01$pop_z[i] >= as.integer(2))
+      , df01$pop_z_20u[i] <- 1
+      , ifelse(
+        (df01$pop_z[i] < as.integer(2))
+        , df01$pop_z_20u[i] <- 0
+        , df01$pop_z_20u[i] <- 1)
+    )} 
+    df01$pop_z_b10 <- 20
+    for (i in 1:nrow(df01)){
+    ifelse(
+      ((as.integer(df01$pop_z_1020[i]) == as.integer(0))
+       && (as.integer(df01$pop_z_20u[i]) == as.integer(0)))
+      , df01$pop_z_b10[i] <- 1
+      , ifelse(
+        ((as.integer(df01$pop_z_1020[i]) == as.integer(1))
+         || (as.integer(df01$pop_z_20u[i]) == as.integer(1)))
+        , df01$pop_z_b10[i] <- 0
+        , df01$pop_z_b10[i] <- 1)
+    )}
+ 
+```
+
+# 2 - Matrix, removal of double 'edges', transposing, etc
+```{r}
+
+# create a distance matrix from two lists (-1 on both first and last city-row)
+l1 <- data.frame(longitude = df01[1:387,3],
+                 latitude = df01[1:387,4])
+l2 <- data.frame(longitude = df01[2:388,3],
+                 latitude = df01[2:388,4])
+mtx <- distm(l1[,c('longitude','latitude')], l2[,c('longitude','latitude')], fun=distVincentyEllipsoid)
+
+#dim(mtx)
+# [1] 387 387
+# elements in mtx = 149769
+# checked: 387*387 = 149769
+
+# remove duplicates and 'eigen'-distances
+mtx[lower.tri(mtx)] <- NA
+#head(mtx)
+#         [,1]      [,2]     [,3]      [,4]      [,5]      [,6]
+# [1,] 181411 158998.75 121147.8  45689.08 189958.68 204965.68
+# [2,]     NA  60463.11 106807.8 178628.27  29788.73  46693.60
+# [3,]     NA        NA 130832.1 141961.74  43773.50  51019.39
+# [4,]     NA        NA       NA 145751.95 131649.72 150232.45
+#dim(mtx) # > [1] 387 387
+
+# transpose as quick-fix for correct iteration direction in as.list
+mx <- t(mtx)
+dists <- as.list(mx)
+dists2 <- dists[!is.na(dists)]
+dists3 <- data.frame(dists2)
+dists4 <- t(dists3)
+dists <- data.frame(dists4)
+
+# ROUND_DISTANCES will be handy for further processing
+# it introcuses a (tolerable?) error of <50 cm. (w/in one distance-measurement!)
+dists$dists_km <- (dists$dists4 / 1000)
+round_distances <- as.integer(round(dists$dists_km))
+dists_z <- scale(round_distances, center = TRUE, scale = TRUE)
+
+# dim(distances) # > [1] 75078     1 # checked: 149769 + 387 / 2 = 75078
+
+```
+
+# 3a - Get all 'pairwise' combinations; combine all variables
+#    -- MERGING
+```{r}
+# dataframe should (row-wise) increase from 388 to 75078 (see above)
+# get X-combinations per Y w/ 'combn' and split into seperate variables
+
+# municipalities
+compared_municipalities <- data.frame(combn(as.character(df01$municipality), 2, FUN = paste, collapse="_"))
+# locations 
+combined_lonlats <- paste(df01$longitude, df01$latitude, sep = ",")
+compared_locations <- data.frame(combn(as.character(combined_lonlats), 2, FUN = paste, collapse="_"))
+# populations
+
+compared_pop_round <- data.frame(combn(as.character(df01$pop_round_100), 2, FUN = paste, collapse="_"))
+compared_pop_z <- data.frame(combn(as.character(df01$pop_z), 2, FUN = paste, collapse="_"))
+compared_pop_z_b10 <- data.frame(combn(as.character(df01$pop_z_b10), 2, FUN = paste, collapse="_"))
+compared_pop_z_1020 <- data.frame(combn(as.character(df01$pop_z_1020), 2, FUN = paste, collapse="_"))
+compared_pop_z_20u <- data.frame(combn(as.character(df01$pop_z_20u), 2, FUN = paste, collapse="_"))
+ 
+df012 <- data.frame(compared_municipalities, compared_locations)
+df013 <- data.frame(df012, dists)
+df014 <- data.frame(df013, dists_z)
+df015 <- data.frame(df014, compared_pop_round)
+df016 <- data.frame(df015, compared_pop_z)
+df017 <- data.frame(df016, compared_pop_z_b10)
+df018 <- data.frame(df017, compared_pop_z_1020) 
+df02 <- data.frame(df018, compared_pop_z_20u)
+
+colnames(df02)[1] <- "compared_municipalities"
+colnames(df02)[2] <- "compared_locations"
+colnames(df02)[3] <- "distances"
+colnames(df02)[4] <- "distances_round"
+colnames(df02)[5] <- "dists_z_normalized"
+colnames(df02)[6] <- "compared_pop_round"
+colnames(df02)[7] <- "compared_pop_z"
+colnames(df02)[8] <- "compared_pop_z_b10"
+colnames(df02)[9] <- "compared_pop_z_1020"
+colnames(df02)[10] <- "compared_pop_z_20u"
+ 
+```
+
+#    -- SPLITTING
+```{r}
+# make seperate lists with split-up's of compared variables
+
+# munis
+lcm <- data.frame(strsplit(as.character(df02$compared_municipalities), '_'))
+lcm2 <- data.frame(t(lcm))
+# locs
+lcl <- data.frame(strsplit(as.character(df02$compared_locations), '_'))
+lcl2 <- data.frame(t(lcl))
+# posp
+lcp <- data.frame(strsplit(as.character(df02$compared_pop_round), '_'))
+lcp2 <- data.frame(t(lcp))
+lcpz <- data.frame(strsplit(as.character(df02$compared_pop_z), '_'))
+lcpz2 <- data.frame(t(lcpz))
+lcpzb1 <- data.frame(strsplit(as.character(df02$compared_pop_z_b10), '_'))
+lcpzb12 <- data.frame(t(lcpzb1))
+lcp12 <- data.frame(strsplit(as.character(df02$compared_pop_z_1020), '_'))
+lcp122 <- data.frame(t(lcp12))
+lcp2u <- data.frame(strsplit(as.character(df02$compared_pop_z_20u), '_'))
+lcp2u2 <- data.frame(t(lcp2u))
+
+# merge back into one dataframe
+df020 <- data.frame(df02, lcm2)
+df021 <- data.frame(df020, lcl2)
+df022 <- data.frame(df021, lcp2)
+df023 <- data.frame(df022, lcpz2)
+df024 <- data.frame(df023, lcpzb12)
+df025 <- data.frame(df024, lcp122)
+df03 <- data.frame(df025, lcp2u2)
