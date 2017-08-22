@@ -51,6 +51,7 @@ colnames(lls) <- c("lon_start","lat_start","lon_end","lat_end")
 df2 <- df2[,-c(3)]
 df3 <- data.frame(df2, lls)
 
+# -> DOESN'T WORK PROPERLY!!! <- 
 # separate the cong and acc measurements
 df_acc <- df3[grep("accDelay", df3$city), ]
 df_con <- df3[grep("congLevel", df3$city), ]
