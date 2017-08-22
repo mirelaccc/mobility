@@ -1,6 +1,6 @@
 
 # some re-wrangling of the 'csv-ed' kml files
-setwd("/home/x/projs/mob/y/csvs/")
+setwd("/a/b/csvs/")
 library(stringr)
 
 # read in files
@@ -20,85 +20,37 @@ colnames(df2)[1] <- "city"
 colnames(df2)[2] <- "level"
 colnames(df2)[3] <- "lonlats"
 
-## removing the ',' at the start
+# removing the ',' at the start
 lonlats <- as.data.frame(df2$lonlats)
 colnames(lonlats) <- "ll"
-# second try
-lonlats2 <- as.data.frame(as.character(df2$lonlats))
-colnames(lonlats2) <- "ll"
 
 library(tidyverse)
+# making smaller dataframes to enable pausing to safe fan-spinning
+# can be larger chunks of course, depends on the machine used
+lonlats_s1 <- as.data.frame(lonlats[1:200000,])
+colnames(lonlats_s1) <- "ll"
+s1 <- read.csv(text = sub("^,", "", lonlats_s1$ll), header = FALSE)
 
-mydata2 <- read.csv(text = sub("^,", "", lonlats2$ll), header = FALSE)
+lonlats_s2 <- as.data.frame(lonlats[200001:400000,])
+colnames(lonlats_s2) <- "ll"
+s2 <- read.csv(text = sub("^,", "", lonlats_s2$ll), header = FALSE)
 
-lonlats2_s <- lonlats2[1:20,]
+lonlats_s3 <- as.data.frame(lonlats[400001:600000,])
+colnames(lonlats_s3) <- "ll"
+s3 <- read.csv(text = sub("^,", "", lonlats_s3$ll), header = FALSE)
 
+lonlats_s4 <- as.data.frame(lonlats[600001:872640,])
+colnames(lonlats_s4) <- "ll"
+s4 <- read.csv(text = sub("^,", "", lonlats_s4$ll), header = FALSE)
+# merge into one, rename cols
+lls <- do.call("rbind", list(s1, s2, s3, s4))
+colnames(lls) <- c("lon_start","lat_start","lon_end","lat_end")
 
-======
+# remove old lonlat col, and have one new, correct dataframe
+df2 <- df2[,-c(3)]
+df3 <- data.frame(df2, lls)
 
-separate(lonlats, ll, into = c("V0", "V1", "V2", "V3", "V4"), sep = ",") %>% select(-V0)
-
-ly <- read.csv(lonlats =sub("^,", "", as.character(lonlats$ll)), header = TRUE) 
-
-write.csv(lonlats, "lls2.csv")
-lx <- read.csv("lls2.csv" =sub("^,", "", as.character(lonlats$ll)), header = TRUE) 
-
-lonlats$ll4 <- sub(',*\\,', '', lonlats)
-
-ll_c <- as.character(df2$lonlats)
-
-ll <- read.table(ll_c, sep = ",")
-
-ll3 <- as.data.frame(sub(',*\\,', '', lonlats))
-
-lonlats$a <- str_split(lonlats, ",")[[1]]
-lonlats$b <- str_split_fixed(lonlats, ",", 2)
-
-str_split_fixed(",", fixed("..."), 2)
-b <- strsplit(as.character(lonlats),',') 
- 
-
-df2$llx <- sub('.*\\,', '', df2$ll4)
-
-
-df2$ll3 <- sapply(strsplit(df2$ll, ","), "[", 2)
-
-df2$ll <- sub(',*\\,', '', df2$lonlats)
-
-df2$ll1 <- sub('*\\,', '', df2$ll)
-df2$ll2 <- sub(',*\\,', '', df2$lonlats)
-df2$ll3 <- sub(',*\\,', '', df2$lonlats)
-df2$ll4 <- sub(',*\\,', '', df2$lonlats)
-
-
-df3_ll <- data.frame(strsplit(as.character(df2$ll), ','))
-df3_ll2 <- data.frame(t(df3_ll), stringsAsFactors = TRUE)
-
-colnames(df3_ll2) <- c("lon_start","lat_start","lon_end","lat_end")
-
-df3a <- df3_ll2$lon_start
-df3b <- df3_ll2$lat_start
-df3c <- df3_ll2$lon_end
-df3d <- df3_ll2$lat_end 
-
-dft1 <- data.frame(df3a,df3b)
-dft2 <- data.frame(dft1,df3c)
-dft3 <- data.frame(dft2,df3d)
- 
-
-colnames(df3_ll2)[1] <- 
-df3_ll3 <- df3_ll2[,c(2,3,4,5)]
-
-
-df_acc <- df3[grep("accDelay", rownames(df3)), ]
-dfcon <- df3[grep("congLevel", rownames(df3)), ]
-
-df_acc <- iris[grep("accDelay", df2$city), ]
-dfcon <- iris[grep("congLevel", df2$city), ]
-
-library("ggmap")
-m <- get_map(location=c(lon=median(test$longitude), lat=median(test$latitude)), zoom=8)
-ggmap(m) + geom_point(aes(x=longitude, y=latitude, color=mode), data=test) + 
-  geom_line(aes(x=longitude, y=latitude, color=mode), data=test)
-
+# separate the cogn and acc measurements
+df_acc <- df3[grep("accDelay", df3$city), ]
+df_con <- df3[grep("congLevel", df3$city), ]
 
