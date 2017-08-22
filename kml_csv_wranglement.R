@@ -25,20 +25,21 @@ lonlats <- as.data.frame(df2$lonlats)
 colnames(lonlats) <- "ll"
 
 library(tidyverse)
-# making smaller dataframes to enable pausing to safe fan-spinning
-# can be larger chunks of course, depends on the machine used
+# making smaller dataframes to enable pausing (& prevent possible crashing :))
+# these can be larger chunks of course, depends on the machine used
+# 1
 lonlats_s1 <- as.data.frame(lonlats[1:200000,])
 colnames(lonlats_s1) <- "ll"
 s1 <- read.csv(text = sub("^,", "", lonlats_s1$ll), header = FALSE)
-
+# 2
 lonlats_s2 <- as.data.frame(lonlats[200001:400000,])
 colnames(lonlats_s2) <- "ll"
 s2 <- read.csv(text = sub("^,", "", lonlats_s2$ll), header = FALSE)
-
+# 3
 lonlats_s3 <- as.data.frame(lonlats[400001:600000,])
 colnames(lonlats_s3) <- "ll"
 s3 <- read.csv(text = sub("^,", "", lonlats_s3$ll), header = FALSE)
-
+# 4
 lonlats_s4 <- as.data.frame(lonlats[600001:872640,])
 colnames(lonlats_s4) <- "ll"
 s4 <- read.csv(text = sub("^,", "", lonlats_s4$ll), header = FALSE)
